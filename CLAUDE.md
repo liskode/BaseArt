@@ -9,7 +9,7 @@ Contient uniquement le **catalogue** (`catalogue.html`) et les **éditeurs** (`w
 - **Médias** (works.json, catalog-state.json, images `catalogue/`, miniatures `catalogue/_thumbs/`) : **pas dans ce dépôt**, chargés depuis `https://mariesallantin.art/media/` (réglé dans `baseart-config.js` → `MEDIA_BASE`). CORS `*` côté GitHub Pages.
 - **Config Supabase front** : `media/collectors-config.json` (URL + clé anon publique + URL des Edge Functions). Jamais de `service_role` dans le front.
 - **Éditeurs en ligne** → Edge Functions (`supabase/functions/*`, `verify_jwt = false`), protégées par le secret `CATALOGUE_EDITOR_TOKEN`.
-- **Import d'œuvres** (images + miniatures + works.json + git push) : se fait **dans le dépôt `liskode/mariesallantin`** (`npm run works:import`), pas ici.
+- **Import d'œuvres** (images + miniatures + works.json + git push) : se fait **dans le dépôt `liskode/mariesallantin`**, cloné localement dans `~/Documents/BaseArtImport` (`cd ~/Documents/BaseArtImport && npm run works:import`), pas ici.
 
 ## Développement local
 ```bash
