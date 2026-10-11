@@ -39,7 +39,9 @@
 
 ## Points d'attention
 
-- Le mot de passe éditeur apparaît en clair dans le dépôt public `mariesallantin` (docs) et **dans le code** : `editor-common.js` et `catalogue.js` (`EDIT_PASS`), ainsi que comme valeur par défaut dans les 6 Edge Functions. À traiter : vérification côté serveur uniquement + nouveau secret.
+- Mot de passe éditeur : corrigé le 11/10/2026. Il est vérifié côté serveur uniquement (`EditorCommon.verifyPassword` → `works-api`), sans valeur par défaut, dans les deux dépôts et les 6 Edge Functions. Le changement du secret `CATALOGUE_EDITOR_TOKEN` (encore `MS75` au moment du déploiement) est à faire par l'utilisateur. `MS75` subsiste seulement dans l'ancienne `catalogue.html` et l'éditeur de légendes désactivé, sans accès serveur.
+- Le site-v2 (`https://mariesallantin.art/site-v2/`) utilise la même base (Edge Function `public-site-api`, REST anon) et remplacera à terme `mariesallantin.art`. Toute modification de schéma ou de fonction doit rester compatible avec lui.
+- Dossier d'import actif de l'utilisateur : `~/Documents/gityphox/PassCorr/mariesallantin` (avec `.env`).
 - Références à `leezsypadtvypdgqgvtk` et `mariesallantin.art` codées en dur dans environ 20 fichiers (éditeurs, scripts, `CNAME`, `sitemap.xml`, config).
 - « Marie Sallantin » est codé en dur dans les pages du site vitrine (`index`, `cv`, `fap`, `liens`, `site-v2/`).
 - `catalogue.mariesallantin.art` a un CNAME vers `liskode.github.io` (OK côté DNS), mais aucun dépôt ne déclare ce domaine : GitHub renvoie 404.
