@@ -45,3 +45,10 @@
 - Références à `leezsypadtvypdgqgvtk` et `mariesallantin.art` codées en dur dans environ 20 fichiers (éditeurs, scripts, `CNAME`, `sitemap.xml`, config).
 - « Marie Sallantin » est codé en dur dans les pages du site vitrine (`index`, `cv`, `fap`, `liens`, `site-v2/`).
 - `catalogue.mariesallantin.art` a un CNAME vers `liskode.github.io` (OK côté DNS), mais aucun dépôt ne déclare ce domaine : GitHub renvoie 404.
+
+## Pistes en attente (reprises de l'historique Cursor)
+
+- **Ménage des images orphelines** : après suppression de doublons dans la base, les fichiers images de `media/catalogue/` ne sont pas supprimés automatiquement. Prévu de faire le nettoyage ensemble.
+- **Photos à refaire** : les nouvelles photos vont remplacer les anciennes (mode « Mise à jour image » de l'import). La détection de doublons par empreinte (SHA/phash) devra en tenir compte.
+- **Contrôle de netteté** automatique des photos : idée évoquée, « pas maintenant ».
+- **Multi-artistes** (ex. `mariesallantin.baseart.com` ou `baseart.com/mariesallantin`) : envisagé puis abandonné (« on ne change rien finalement »), mais ce serait la raison d'être du nom BaseArt.
