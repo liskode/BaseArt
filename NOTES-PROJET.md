@@ -31,9 +31,12 @@
 - Pas de duplication Supabase : on **garde BaseArtMS** comme unique base, pour rester à 2 projets actifs avec foxbox.
 - Le projet Supabase « BaseArt » (en pause) a été supprimé par l’utilisateur le 11/10/2026.
 
+- Dépôt **`liskode/BaseArt`** (public) créé : catalogue et éditeurs seulement (option A). Les médias viennent de `https://mariesallantin.art/media/` (`baseart-config.js`).
+- En ligne sur https://catalogue.mariesallantin.art (Pages, HTTPS forcé, certificat valide jusqu'au 09/01/2027).
+
 ## Points d'attention
 
-- Le mot de passe éditeur **`MS75`** apparaît en clair dans le dépôt public : `.env.example`, `IMPORT-STUDIO.txt`, `supabase/README.md`. Il faut le changer pour BaseArt.
+- Le mot de passe éditeur apparaît en clair dans le dépôt public `mariesallantin` (docs) et **dans le code** : `editor-common.js` et `catalogue.js` (`EDIT_PASS`), ainsi que comme valeur par défaut dans les 6 Edge Functions. À traiter : vérification côté serveur uniquement + nouveau secret.
 - Références à `leezsypadtvypdgqgvtk` et `mariesallantin.art` codées en dur dans environ 20 fichiers (éditeurs, scripts, `CNAME`, `sitemap.xml`, config).
 - « Marie Sallantin » est codé en dur dans les pages du site vitrine (`index`, `cv`, `fap`, `liens`, `site-v2/`).
 - `catalogue.mariesallantin.art` a un CNAME vers `liskode.github.io` (OK côté DNS), mais aucun dépôt ne déclare ce domaine : GitHub renvoie 404.
