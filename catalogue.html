@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Catalogue [PARTIEL] des œuvres de Marie Sallantin</title>
+  <meta name="description" content="Catalogue partiel en cours : fichiers, séries, dimensions et poids des images, légendes et métadonnées." />
+  <link rel="stylesheet" href="catalogue.css" />
+  <link rel="icon" type="image/png" href="images/logo-artmajeur.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body class="catalogue-standalone">
+  <div id="catalogue-app" class="catalogue-app">
+  <header class="catalogue-standalone-header">
+    <div class="catalogue-standalone-inner catalogue-standalone-header-inner">
+      <a
+        class="catalogue-header-adagp"
+        href="https://www.adagp.fr"
+        target="_blank"
+        rel="noopener noreferrer"
+        title="ADAGP — Société des auteurs dans les arts graphiques et plastiques"
+      >
+        <img
+          class="catalogue-header-adagp-logo"
+          src="images/ADAGP_logo.png"
+          alt="ADAGP"
+          width="120"
+          height="48"
+        />
+      </a>
+      <div class="catalogue-header-text">
+        <h1>Catalogue [PARTIEL] des œuvres de Marie Sallantin</h1>
+        <p class="catalogue-header-subtitle">
+          Travail de cataloguage en cours soutenu par une dotation de l'ADAGP
+        </p>
+        <p class="catalogue-standalone-meta">Catalogue partiel — consultation</p>
+      </div>
+    </div>
+  </header>
+  <main class="catalogue-page" id="catalogue-root">
+    <div class="catalogue-standalone-inner catalogue-standalone-main">
+      <p class="catalogue-intro">
+        Tri et filtres sur tout le catalogue ; pagination (50 / 100 / 200 / tout) pour limiter les vignettes chargées. Survol du tableau pour agrandir une image.
+      </p>
+      <div class="catalogue-toolbar">
+        <p class="catalogue-count" id="catalogue-count" aria-live="polite">0 affiché sur 0</p>
+        <div class="catalogue-edit-tools">
+          <button type="button" class="catalogue-edit-toggle" id="catalogue-edit-toggle" aria-pressed="false">
+            Mode edition: OFF
+          </button>
+          <button type="button" class="catalogue-edit-export" id="catalogue-edit-export" disabled>
+            Telecharger works.json modifie
+          </button>
+        </div>
+        <div class="catalogue-pagination" id="catalogue-pagination" hidden>
+          <button type="button" class="catalogue-page-btn" id="catalogue-page-prev" aria-label="Page précédente">←</button>
+          <span class="catalogue-page-label" id="catalogue-page-label">Page 1 / 1</span>
+          <button type="button" class="catalogue-page-btn" id="catalogue-page-next" aria-label="Page suivante">→</button>
+          <label class="catalogue-page-size-label">
+            <span class="catalogue-page-size-text">Lignes par page</span>
+            <select id="catalogue-page-size" class="catalogue-select catalogue-select--inline" aria-label="Nombre de lignes par page">
+              <option value="50" selected>50</option>
+              <option value="100">100</option>
+              <option value="200">200</option>
+              <option value="all">Tout</option>
+            </select>
+          </label>
+        </div>
+      </div>
+      <p class="catalogue-loading">Chargement du catalogue…</p>
+      <div class="catalogue-table-wrap" id="catalogue-table-wrap">
+        <table class="catalogue-table">
+          <thead id="catalogue-thead">
+            <tr>
+              <th class="col-thumb catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="order" title="Trier par ordre dans works.json">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Vignette</span>
+                </button>
+              </th>
+              <th class="catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="id" title="Trier par id MS">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Id</span>
+                </button>
+              </th>
+              <th class="catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="fileName" title="Trier par nom de fichier">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Fichier</span>
+                </button>
+              </th>
+              <th class="catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="ext" title="Trier par extension">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Ext.</span>
+                </button>
+              </th>
+              <th class="catalogue-th catalogue-th--has-filter" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="seriesName" title="Trier par série">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Série</span>
+                </button>
+                <select id="catalogue-filter-serie" class="catalogue-select catalogue-select--header" aria-label="Filtrer par série"></select>
+              </th>
+              <th class="catalogue-th catalogue-th--has-filter" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="photo" title="Trier par statut photo">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Photo</span>
+                </button>
+                <select id="catalogue-filter-photo" class="catalogue-select catalogue-select--header" aria-label="Filtrer par photo"></select>
+              </th>
+              <th class="catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="dimensions" title="Trier par dimensions">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Dimensions</span>
+                </button>
+              </th>
+              <th class="catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="tailleMo" title="Trier par taille fichier (Mo)">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Taille (Mo)</span>
+                </button>
+              </th>
+              <th class="col-legende catalogue-th" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="title" title="Trier par légende">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Légende</span>
+                </button>
+              </th>
+              <th class="catalogue-th catalogue-th--has-filter" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="publish" title="Trier par statut de publication (fichier)">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">Publication</span>
+                </button>
+                <select id="catalogue-filter-publish" class="catalogue-select catalogue-select--header" aria-label="Filtrer par publication fichier"></select>
+              </th>
+              <th class="catalogue-th catalogue-th--has-filter" scope="col">
+                <button type="button" class="catalogue-sort-btn" data-sort-key="etat" title="Trier par état">
+                  <span class="catalogue-sort-icons" aria-hidden="true">
+                    <span class="catalogue-sort-up">▲</span>
+                    <span class="catalogue-sort-down">▼</span>
+                  </span>
+                  <span class="catalogue-sort-label">État</span>
+                </button>
+                <select id="catalogue-filter-etat" class="catalogue-select catalogue-select--header" aria-label="Filtrer par état">
+                  <option value="">Tous</option>
+                  <option value="P">Publié</option>
+                  <option value="S">Suspendu</option>
+                  <option value="none">Non renseigné</option>
+                </select>
+              </th>
+            </tr>
+          </thead>
+          <tbody id="catalogue-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+  <img id="catalogue-preview-img" class="catalogue-preview" alt="" aria-hidden="true" />
+  <div id="catalogue-edit-backdrop" class="catalogue-edit-backdrop" hidden></div>
+  <dialog id="catalogue-edit-dialog" class="catalogue-edit-dialog" aria-labelledby="catalogue-edit-title">
+    <button type="button" class="catalogue-edit-close" id="catalogue-edit-close" aria-label="Fermer">×</button>
+    <div class="catalogue-edit-layout">
+      <div class="catalogue-edit-left">
+        <img id="catalogue-edit-image" class="catalogue-edit-image" alt="" />
+        <p class="catalogue-edit-id" id="catalogue-edit-id"></p>
+      </div>
+      <form class="catalogue-edit-form" id="catalogue-edit-form">
+        <h2 id="catalogue-edit-title">Edition oeuvre</h2>
+        <label class="catalogue-edit-label">
+          <span>Titre / legende</span>
+          <textarea id="catalogue-edit-title-input" rows="4"></textarea>
+        </label>
+        <label class="catalogue-edit-label">
+          <span>Series (selection multiple)</span>
+          <button type="button" class="catalogue-multiselect-toggle" id="catalogue-edit-series-toggle">Choisir...</button>
+          <div class="catalogue-multiselect-panel" id="catalogue-edit-series-panel" hidden></div>
+        </label>
+        <label class="catalogue-edit-label">
+          <span>Format (code 4 caracteres)</span>
+          <select id="catalogue-edit-format"></select>
+        </label>
+        <label class="catalogue-edit-label">
+          <span>Annee (4 chiffres)</span>
+          <input id="catalogue-edit-year" type="text" inputmode="numeric" maxlength="4" />
+        </label>
+        <label class="catalogue-edit-label">
+          <span>Technique (code 3 caracteres)</span>
+          <select id="catalogue-edit-technique"></select>
+        </label>
+        <p class="catalogue-edit-error" id="catalogue-edit-error" hidden></p>
+        <div class="catalogue-edit-actions">
+          <button type="submit" class="catalogue-edit-save">Enregistrer cette oeuvre</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+  </div>
+  <script src="baseart-config.js"></script>
+  <script src="works-catalog.js"></script>
+  <script src="catalogue.js"></script>
+</body>
+</html>

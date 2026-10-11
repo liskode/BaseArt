@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <meta name="works-api" content="https://leezsypadtvypdgqgvtk.supabase.co/functions/v1/works-api" />
+  <meta name="supabase-anon-key" content="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlZXpzeXBhZHR2eXBkZ3FndnRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzNTk3MTYsImV4cCI6MjA5NzkzNTcxNn0.kzN9eL5fhbFLECWD4PMPXjTHSYh-KJsbjCcPrwJoaTo" />
+  <title>Interface d'édition des fichiers du catalogue</title>
+  <link rel="stylesheet" href="catalogue.css?v=20250929-1" />
+  <link rel="icon" type="image/png" href="images/logo-artmajeur.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body class="catalogue-standalone" data-editor-tab="works">
+  <header class="catalogue-standalone-header">
+    <div class="catalogue-standalone-inner catalogue-standalone-header-inner catalogue-standalone-header-inner--logos">
+      <a class="catalogue-header-ms" href="https://mariesallantin.art/" title="Marie Sallantin — accueil">
+        <img class="catalogue-header-ms-logo" src="images/logoMS.png" alt="Marie Sallantin" width="240" height="96" />
+      </a>
+      <div class="catalogue-header-text catalogue-header-text--center">
+        <h1>Interface d'édition des fichiers du catalogue</h1>
+        <p class="works-editor-priority-subtitle">→ Mise à jour titre format technique</p>
+      </div>
+      <div class="catalogue-header-partners">
+        <span class="catalogue-header-baseart" title="BaseArt">
+          <img class="catalogue-header-baseart-logo" src="images/Logo-BaseArt.jpeg" alt="BaseArt" width="120" height="48" />
+        </span>
+        <a class="catalogue-header-adagp" href="https://www.adagp.fr" target="_blank" rel="noopener noreferrer" title="ADAGP">
+          <img class="catalogue-header-adagp-logo" src="images/ADAGP_logo.png" alt="ADAGP" width="120" height="48" />
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <div id="editor-tabs-mount"></div>
+
+  <div id="works-login" class="catalogue-login">
+    <div class="catalogue-login-box">
+      <h1 class="catalogue-login-title">Interface d'édition des fichiers du catalogue</h1>
+      <p class="works-editor-priority-subtitle works-editor-priority-subtitle--login">→ Mise à jour titre format technique</p>
+      <p class="catalogue-intro" style="margin-bottom: 16px;">
+        Édition des fiches œuvres : titres, codes format et technique, séries, collectionneur, statuts.
+        Après connexion, le bouton <strong>Importer des œuvres</strong> est à droite de la barre d’outils.
+      </p>
+      <label class="catalogue-login-label" for="works-pass">Mot de passe</label>
+      <input type="password" id="works-pass" class="catalogue-login-input" autocomplete="current-password" />
+      <button type="button" id="works-login-btn" class="catalogue-login-submit">Ouvrir l’éditeur</button>
+      <p id="works-login-error" class="catalogue-login-error" hidden></p>
+      <p class="legend-editor-api-hint" id="works-api-hint"></p>
+    </div>
+  </div>
+
+  <div id="works-app" class="catalogue-app" hidden>
+    <main class="catalogue-page works-editor-page">
+      <div class="catalogue-standalone-inner catalogue-standalone-main works-editor-layout">
+        <p id="works-status" class="legend-editor-api-hint" aria-live="polite"></p>
+
+        <div class="works-editor-sticky-bar" id="works-sticky-bar">
+          <div class="legend-editor-toolbar works-editor-toolbar">
+            <div class="works-editor-toolbar-left">
+              <p class="catalogue-count" id="works-count" aria-live="polite">0 tableau(x)</p>
+              <label class="works-editor-filter">
+                <span class="works-editor-filter-label">Titre</span>
+                <input type="search" id="works-filter-title" class="works-editor-filter-input" placeholder="Filtrer…" autocomplete="off" aria-label="Filtrer par titre" />
+              </label>
+              <label class="works-editor-filter works-editor-filter--codes">
+                <span class="works-editor-filter-label">Code</span>
+                <input type="search" id="works-filter-codes" class="works-editor-filter-input" placeholder="ex. 440 521" autocomplete="off" aria-label="Filtrer par codes MS (plusieurs codes séparés par espace ou virgule)" title="Saisir un ou plusieurs codes (avec ou sans MS), séparés par espace ou virgule. Ex. 440 521 ou MS0440,MS0521." />
+              </label>
+              <label class="works-editor-filter works-editor-filter--series">
+                <span class="works-editor-filter-label">Séries</span>
+                <input type="search" id="works-filter-series" class="works-editor-filter-input" placeholder="ex. APHRO DANAE" autocomplete="off" aria-label="Filtrer par séries (plusieurs codes = toutes requises)" title="Saisir un ou plusieurs codes séparés par un espace ; l'œuvre doit avoir toutes les séries indiquées." />
+              </label>
+              <div class="catalogue-pagination works-editor-pagination" id="works-pagination" hidden>
+                <button type="button" class="catalogue-page-btn" id="works-page-prev" aria-label="Page précédente" disabled>←</button>
+                <span id="works-page-info" class="catalogue-page-label">Page 1 / 1</span>
+                <button type="button" class="catalogue-page-btn" id="works-page-next" aria-label="Page suivante">→</button>
+                <label class="catalogue-page-size-label">
+                  <span class="catalogue-page-size-text">Œuvres par page</span>
+                  <select id="works-page-size" class="catalogue-select catalogue-select--inline" aria-label="Nombre d'œuvres par page">
+                    <option value="50" selected>50</option>
+                    <option value="100">100</option>
+                    <option value="200">200</option>
+                    <option value="all">Tout</option>
+                  </select>
+                </label>
+              </div>
+              <div class="catalogue-edit-tools works-editor-main-tools">
+                <button type="button" class="legend-editor-btn legend-editor-btn--save legend-editor-btn--save-clean" id="works-save-btn" disabled>
+                  Modifications enregistrées
+                </button>
+                <button type="button" class="legend-editor-btn legend-editor-btn--with-picto" id="works-reload-btn">
+                  <img src="images/reload.png" alt="" class="legend-editor-btn-picto" width="18" height="18" />
+                  <span>Recharger</span>
+                </button>
+              </div>
+            </div>
+            <div class="catalogue-edit-tools works-editor-import-tools">
+              <button
+                type="button"
+                class="legend-editor-btn works-delete-lock-btn"
+                id="works-delete-lock-btn"
+                aria-pressed="false"
+                aria-label="Déverrouiller la suppression"
+                title="Suppression verrouillée — cliquer pour afficher les corbeilles"
+              >
+                <img
+                  src="images/cadenas_close.png"
+                  alt=""
+                  class="legend-editor-btn-picto works-delete-lock-icon"
+                  id="works-delete-lock-icon"
+                  width="18"
+                  height="18"
+                />
+              </button>
+              <button type="button" class="legend-editor-btn works-import-toolbar-btn" id="works-import-btn" aria-label="Importer des œuvres" title="Importer des œuvres (studio local : npm run works:import)">
+                <img src="images/import.png" alt="" class="legend-editor-btn-picto" width="16" height="16" />
+              </button>
+              <button type="button" class="legend-editor-btn works-publish-toolbar-btn" id="works-publish-btn" hidden title="Publier les médias sur mariesallantin.art (git push)">
+                Publier médias
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="legend-editor-table-wrap works-editor-table-wrap">
+          <table class="catalogue-table legend-editor-table works-editor-table">
+            <colgroup>
+              <col class="works-col-thumb" />
+              <col class="works-col-code" />
+              <col class="works-col-title" />
+              <col class="works-col-year" />
+              <col class="works-col-format" />
+              <col class="works-col-technique" />
+              <col class="works-col-series" />
+              <col class="works-col-collector" />
+              <col class="works-col-pub" />
+              <col class="works-col-photo" />
+              <col class="works-col-photo-credit" />
+            </colgroup>
+            <thead>
+              <tr>
+                <th scope="col" class="works-thumb-th" aria-label="Vignette"></th>
+                <th scope="col" class="catalogue-th works-col-code">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="id" title="Trier par code (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Code</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-title">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="title" title="Trier par titre (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Titre</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-year">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="year" title="Trier par année (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Année</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-format">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="format" title="Trier par format · pastille H/L : vert &lt;5 %, jaune 5–10 %, rouge &gt;10 %">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Format</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-technique">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="technique" title="Trier par technique (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Technique</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-series">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="series" title="Trier par séries (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Séries</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-collector">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="collector" title="Trier par collectionneur (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Collectionneur</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-pub">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="publication" title="Trier par statut publication (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Pub.</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-photo">
+                  <button type="button" class="catalogue-sort-btn works-sort-btn works-sort-btn--asc-only" data-sort-key="photo" title="Trier par statut photo (croissant)">
+                    <span class="catalogue-sort-icons" aria-hidden="true">
+                      <span class="catalogue-sort-up">▲</span>
+                    </span>
+                    <span class="catalogue-sort-label">Photo</span>
+                  </button>
+                </th>
+                <th scope="col" class="catalogue-th works-col-photo-credit" title="Crédit photographique — initiales en colonne, nom complet à l’édition">
+                  <span class="catalogue-sort-label">Créd.</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody id="works-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <img id="works-preview-img" class="catalogue-preview" alt="" aria-hidden="true" />
+
+  <dialog id="works-import-dialog" class="works-import-dialog">
+    <div class="works-import-dialog-panel">
+      <header class="works-import-dialog-header">
+        <h2 class="works-import-dialog-title" id="works-import-dialog-title">Importer des œuvres</h2>
+        <button type="button" class="works-import-dialog-close" id="works-import-close" aria-label="Fermer">×</button>
+      </header>
+      <div id="works-import-env-notice" class="works-import-env-notice" role="status" aria-live="polite"></div>
+      <div class="works-import-form">
+        <label class="works-import-label">
+          Images
+          <input type="file" id="works-import-files" accept="image/jpeg,image/png,image/webp,image/gif" multiple />
+        </label>
+        <fieldset class="works-import-fieldset">
+          <legend>Mode d'import</legend>
+          <label class="works-import-radio">
+            <input type="radio" name="works-import-mode" value="add" checked />
+            Ajout d'œuvres
+            <span class="works-import-radio-detail">— nouveaux numéros MS#### ; séries, année, technique et titre extraits du nom de fichier</span>
+          </label>
+          <label class="works-import-radio">
+            <input type="radio" name="works-import-mode" value="update" />
+            Mise à jour de l'image
+            <span class="works-import-radio-detail">— remplacement du fichier image à partir du numéro MS#### dans le nom (ex. <code>MS0300.jpeg</code>)</span>
+          </label>
+          <p class="works-import-next-id-hint" id="works-import-next-id-wrap">
+            Prochain numéro en ajout : <strong id="works-import-next-id">…</strong>
+          </p>
+        </fieldset>
+        <label class="works-import-label works-import-photo-label">
+          Statut photo
+          <select id="works-import-photo-status" class="legend-select works-import-photo-select" aria-label="Statut photo pour les œuvres importées">
+            <option value="">—</option>
+          </select>
+          <span class="works-import-radio-detail">Laissez « — » pour ne pas renseigner le statut photo.</span>
+        </label>
+      </div>
+      <div class="works-import-error-summary" id="works-import-error-summary" hidden>
+        <p class="works-import-error-summary-title">Erreurs détectées</p>
+        <ul class="works-import-error-summary-list" id="works-import-error-summary-list"></ul>
+      </div>
+      <div class="works-import-preview-wrap" id="works-import-preview-wrap" hidden>
+        <table class="catalogue-table works-import-preview-table">
+          <thead>
+            <tr>
+              <th class="works-import-preview-thumb-th" scope="col" aria-label="Vignette"></th>
+              <th>Fichier</th>
+              <th>Code</th>
+              <th>Image</th>
+              <th>Série(s)</th>
+              <th>Format</th>
+              <th>Technique</th>
+              <th>Titre</th>
+              <th>Problèmes</th>
+            </tr>
+          </thead>
+          <tbody id="works-import-preview-tbody"></tbody>
+        </table>
+      </div>
+      <p id="works-import-status" class="legend-editor-api-hint" aria-live="polite"></p>
+      <p class="works-import-codes-hint legend-editor-api-hint" id="works-import-codes-hint" hidden>
+        Code manquant ? Ouvrez l’éditeur
+        <a href="http://127.0.0.1:47834/" target="_blank" rel="noopener noreferrer">Codes</a>
+        ou
+        <a href="http://127.0.0.1:47833/" target="_blank" rel="noopener noreferrer">Séries</a>
+        dans un autre onglet, puis rechargez l’aperçu.
+      </p>
+      <label class="works-import-publish-option" id="works-import-publish-wrap" hidden>
+        <input type="checkbox" id="works-import-publish-after" checked />
+        Publier sur mariesallantin.art après import (<code>git push</code>)
+      </label>
+      <footer class="works-import-dialog-footer">
+        <button type="button" class="legend-editor-btn" id="works-import-cancel">Annuler</button>
+        <button type="button" class="legend-editor-btn legend-editor-btn--save" id="works-import-submit" disabled>
+          Importer
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog id="works-import-dupe-dialog" class="works-import-dupe-dialog">
+    <div class="works-import-dupe-panel">
+      <header class="works-import-dialog-header">
+        <h2 class="works-import-dialog-title" id="works-import-dupe-title">Doublon suspecté</h2>
+        <button type="button" class="works-import-dialog-close" id="works-import-dupe-close" aria-label="Annuler l’import">×</button>
+      </header>
+      <p class="works-import-dupe-progress" id="works-import-dupe-progress" aria-live="polite"></p>
+      <p class="works-import-dupe-reason" id="works-import-dupe-reason"></p>
+      <div class="works-import-dupe-compare">
+        <figure class="works-import-dupe-figure">
+          <figcaption>Nouvelle image</figcaption>
+          <img id="works-import-dupe-new-img" alt="Nouvelle image à importer" />
+          <p class="works-import-dupe-meta" id="works-import-dupe-new-meta"></p>
+        </figure>
+        <figure class="works-import-dupe-figure">
+          <figcaption>Catalogue existant</figcaption>
+          <img id="works-import-dupe-exist-img" alt="Œuvre déjà en catalogue" />
+          <p class="works-import-dupe-meta" id="works-import-dupe-exist-meta"></p>
+        </figure>
+      </div>
+      <footer class="works-import-dialog-footer works-import-dupe-footer">
+        <button type="button" class="legend-editor-btn" id="works-import-dupe-cancel">Annuler l’import</button>
+        <button type="button" class="legend-editor-btn" id="works-import-dupe-skip">Ne pas importer</button>
+        <button type="button" class="legend-editor-btn legend-editor-btn--save" id="works-import-dupe-force">
+          Importer quand même
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <dialog id="works-publish-dialog" class="works-publish-dialog">
+    <div class="works-publish-dialog-panel">
+      <header class="works-import-dialog-header">
+        <h2 class="works-import-dialog-title">Publier sur mariesallantin.art</h2>
+        <button type="button" class="works-import-dialog-close" id="works-publish-close" aria-label="Fermer">×</button>
+      </header>
+      <p class="legend-editor-api-hint">
+        Commit et push des images, miniatures et <code>media/works.json</code> vers GitHub Pages.
+      </p>
+      <ul id="works-publish-file-list" class="works-publish-file-list"></ul>
+      <label class="works-import-label" for="works-publish-message">Message de commit</label>
+      <input type="text" id="works-publish-message" class="catalogue-login-input works-publish-message-input" />
+      <p id="works-publish-status" class="legend-editor-api-hint" aria-live="polite"></p>
+      <footer class="works-import-dialog-footer">
+        <button type="button" class="legend-editor-btn" id="works-publish-cancel">Annuler</button>
+        <button type="button" class="legend-editor-btn legend-editor-btn--save" id="works-publish-confirm">
+          Publier (git push)
+        </button>
+      </footer>
+    </div>
+  </dialog>
+
+  <script src="baseart-config.js"></script>
+
+  <script src="editor-common.js?v=20250702-1"></script>
+  <script src="works-editor.js?v=20250929-1"></script>
+</body>
+</html>

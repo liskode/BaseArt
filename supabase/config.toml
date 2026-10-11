@@ -1,0 +1,17 @@
+# Supabase local / Edge Functions
+# https://supabase.com/docs/guides/functions
+
+[functions.collectors-api]
+verify_jwt = false
+
+[functions.series-api]
+verify_jwt = false
+
+[functions.codes-api]
+verify_jwt = false
+
+[functions.works-api]
+verify_jwt = false
+
+[functions.public-site-api]
+verify_jwt = false
