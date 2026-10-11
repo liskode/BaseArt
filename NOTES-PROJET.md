@@ -48,7 +48,7 @@
 
 ## Pistes en attente (reprises de l'historique Cursor)
 
-- **Ménage des images orphelines** : après suppression de doublons dans la base, les fichiers images de `media/catalogue/` ne sont pas supprimés automatiquement. Prévu de faire le nettoyage ensemble.
+- ~~Ménage des images orphelines~~ : fait le 11/10/2026. 70 images + 79 miniatures archivées dans `~/Documents/BaseArt-archives/images-orphelines-2026-10-11/`, `works.json` aligné sur la base (845 œuvres). Le script d'analyse compare base, `media/catalogue`, `_thumbs` et `works.json`. Penser à refaire ce contrôle après de nouvelles suppressions : la suppression d'une œuvre dans l'éditeur n'efface ni l'image ni l'entrée de `works.json`.
 - **Photos à refaire** : les nouvelles photos vont remplacer les anciennes (mode « Mise à jour image » de l'import). La détection de doublons par empreinte (SHA/phash) devra en tenir compte.
 - **Contrôle de netteté** automatique des photos : idée évoquée, « pas maintenant ».
 - **Multi-artistes** (ex. `mariesallantin.baseart.com` ou `baseart.com/mariesallantin`) : envisagé puis abandonné (« on ne change rien finalement »), mais ce serait la raison d'être du nom BaseArt.
