@@ -34,6 +34,9 @@
 - Dépôt **`liskode/BaseArt`** (public) créé : catalogue et éditeurs seulement (option A). Les médias viennent de `https://mariesallantin.art/media/` (`baseart-config.js`).
 - En ligne sur https://catalogue.mariesallantin.art (Pages, HTTPS forcé, certificat valide jusqu'au 09/01/2027).
 
+- La racine du sous-domaine reste sur l'**ancienne consultation** (`catalogue.html`) jusqu'à ce que le site soit prêt et la base complète (objectif : printemps 2027, beaucoup de photos à refaire). On basculera alors vers la nouvelle version.
+- Le travail se concentre sur **`works-editor`** (https://catalogue.mariesallantin.art/works-editor.html).
+
 ## Points d'attention
 
 - Le mot de passe éditeur apparaît en clair dans le dépôt public `mariesallantin` (docs) et **dans le code** : `editor-common.js` et `catalogue.js` (`EDIT_PASS`), ainsi que comme valeur par défaut dans les 6 Edge Functions. À traiter : vérification côté serveur uniquement + nouveau secret.
