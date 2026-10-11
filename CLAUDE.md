@@ -4,7 +4,8 @@ Site statique (HTML/CSS/JS vanilla, sans build) publié par GitHub Pages sur **h
 Contient uniquement le **catalogue** (`catalogue.html`) et les **éditeurs** (`works-editor`, `series`, `codes-editor`, `collectors`, `events-editor`, `resources-editor`).
 
 ## Architecture
-- **Base de données** : Supabase `BaseArtMS` (ref `leezsypadtvypdgqgvtk`), partagée avec le site `mariesallantin.art`. Toute modification de schéma ou d'Edge Function impacte les deux sites.
+- **Base de données** : Supabase `BaseArtMS` (ref `leezsypadtvypdgqgvtk`), partagée avec le site `mariesallantin.art` et avec le **site-v2** (`https://mariesallantin.art/site-v2/`, futur site principal, via l'Edge Function `public-site-api`). Toute modification de schéma ou d'Edge Function doit rester compatible avec ces sites.
+- **Mot de passe éditeur** : vérifié uniquement côté serveur (`EditorCommon.verifyPassword` → `works-api`, secret `CATALOGUE_EDITOR_TOKEN`). Ne jamais le réécrire dans le code.
 - **Médias** (works.json, catalog-state.json, images `catalogue/`, miniatures `catalogue/_thumbs/`) : **pas dans ce dépôt**, chargés depuis `https://mariesallantin.art/media/` (réglé dans `baseart-config.js` → `MEDIA_BASE`). CORS `*` côté GitHub Pages.
 - **Config Supabase front** : `media/collectors-config.json` (URL + clé anon publique + URL des Edge Functions). Jamais de `service_role` dans le front.
 - **Éditeurs en ligne** → Edge Functions (`supabase/functions/*`, `verify_jwt = false`), protégées par le secret `CATALOGUE_EDITOR_TOKEN`.
