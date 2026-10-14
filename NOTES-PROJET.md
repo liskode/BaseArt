@@ -52,3 +52,9 @@
 - **Photos à refaire** : les nouvelles photos vont remplacer les anciennes (mode « Mise à jour image » de l'import). La détection de doublons par empreinte (SHA/phash) devra en tenir compte.
 - **Contrôle de netteté** automatique des photos : idée évoquée, « pas maintenant ».
 - **Multi-artistes** (ex. `mariesallantin.baseart.com` ou `baseart.com/mariesallantin`) : envisagé puis abandonné (« on ne change rien finalement »), mais ce serait la raison d'être du nom BaseArt.
+
+## Séries à vérifier (14/10/2026)
+
+Bug corrigé : l'éditeur ne lisait que 1000 des 1097 liens œuvre-série, et enregistrer une œuvre touchée effaçait ses séries non affichées. Ces 27 œuvres ont dans `works.json` des séries absentes de la base (retrait volontaire ou perte due au bug, impossible à distinguer) :
+
+MS0092:CIEUX · MS0098:ENCRE+ENFER · MS0103:DANTE+ENCRE · MS0146:ATELI+JUGEM · MS0682:BAIGN · MS0797:ATELI+CIEUX · MS0798:CIEUX+ATELI · MS0799:ATELI+JUGEM · MS0810:CIEUX+ANGES · MS0825:CIEUX · MS0835:CIEUX · MS0847:CIEUX+ANGES · MS0867:CIEUX · MS0868:BAIGN+AUTOM+ETANG · MS0873:BAIGN+AUTOM+ETANG · MS0874:ETANG+BAIGN+PRINT · MS0880:BAIGN+AUTOM+ETANG · MS0883:ETANG · MS0884:ETANG+AUTOM · MS0885:BAIGN+AUTOM+ETANG · MS0886:BAIGN+AUTOM+ETANG · MS0887:ETANG · MS0889:ESTIV+ETANG+COMPA+BAIGN · MS0892:ETANG+ESTIV+COMPA+BAIGN · MS0896:COMPA+ESTIV+ETANG+BAIGN · MS0897:COMPA+ESTIV+ETANG+BAIGN · MS0901:COMPA+ESTIV+ETANG+BAIGN
