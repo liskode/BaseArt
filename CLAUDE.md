@@ -22,3 +22,13 @@ python3 -m http.server 8765   # puis http://localhost:8765/catalogue.html
 - Identifiants œuvres `MS0001`…; codes séries/formats/techniques gérés en base.
 - Ne jamais committer de secret (`.env`, mot de passe éditeur, `service_role`).
 - `supabase/` : migrations et Edge Functions (copie de référence reprise de `mariesallantin` le 11/10/2026). Déploiement : `supabase functions deploy <nom> --no-verify-jwt --project-ref leezsypadtvypdgqgvtk`.
+
+## Deux dépôts, fichiers partagés
+- `works-editor.js`, `catalogue.css`, `editor-common.js` et `supabase/` existent dans BaseArt **et** dans `~/Documents/BaseArtImport` (dépôt `mariesallantin`). Modifier dans BaseArt puis **recopier à l'identique** dans BaseArtImport (la version BaseArt fonctionne dans les deux grâce au repli `media/` de `MEDIA_BASE`).
+- Lectures de listes Supabase : toujours via `fetchAll` (tranches de 1000, ordre stable) — PostgREST plafonne à 1000 lignes.
+- Migrations appliquées avec `supabase db query --linked -f <fichier>` depuis BaseArtImport (projet lié), après accord de l'utilisateur.
+
+## Qualité photo, in situ, doublons (14/10/2026)
+- `works.image_quality` (0–100) + `image_quality_details` : `scripts/image-quality.mjs`, `npm run works:quality`. Pastille dans l'éditeur à côté du code MS.
+- `situ_photos` / `situ_photo_works` / `situ_photo_types` : photos d'atelier, d'exposition, chez un collectionneur, hors catalogue raisonné, rattachées à une ou plusieurs œuvres.
+- `work_similarities` : doublons possibles (distance Vision), statut `open` / `dismissed`. Seuils : < 0,33 même œuvre ; 0,33–0,47 doublon possible ; > 0,47 œuvres différentes.
