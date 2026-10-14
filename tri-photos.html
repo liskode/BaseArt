@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tri des photos — BaseArt</title>
+  <link rel="stylesheet" href="tri-photos.css?v=2">
+</head>
+<body>
+  <section id="login" class="login">
+    <h1>Tri des photos à importer</h1>
+    <p>Pour chaque photo de la photothèque : doublon d'une œuvre du catalogue, nouvelle œuvre, ou autre photo à conserver (détail, atelier, exposition…).</p>
+    <label for="pass">Mot de passe</label>
+    <input type="password" id="pass" autocomplete="current-password">
+    <button type="button" id="login-btn">Ouvrir</button>
+    <p id="login-err" class="err" hidden></p>
+  </section>
+
+  <section id="app" class="app" hidden>
+    <header class="top">
+      <h1>Tri des photos</h1>
+      <div class="progress"><div id="progress-bar"></div></div>
+      <span id="progress-text" class="muted"></span>
+      <select id="filter" aria-label="Photos affichées">
+        <option value="todo">À traiter</option>
+        <option value="todo-duplicate">À traiter — doublons proposés</option>
+        <option value="todo-new">À traiter — nouvelles œuvres proposées</option>
+        <option value="todo-situ">À traiter — autres photos proposées</option>
+        <option value="done">Déjà traitées</option>
+        <option value="all">Toutes</option>
+      </select>
+      <span class="nav">
+        <button type="button" id="prev" title="Photo précédente (←)">←</button>
+        <span id="position" class="muted"></span>
+        <button type="button" id="next" title="Photo suivante (→)">→</button>
+      </span>
+    </header>
+
+    <main class="stage" id="stage">
+      <figure class="viewer">
+        <img id="big" alt="">
+        <figcaption id="big-caption" class="muted"></figcaption>
+        <div id="choices" class="choices" aria-label="Photos disponibles : cliquer pour sélectionner"></div>
+      </figure>
+
+      <aside class="panel">
+        <p id="proposal" class="proposal"></p>
+        <div id="meta" class="meta"></div>
+        <div id="decided" class="decided" hidden></div>
+
+        <div id="actions" class="actions">
+          <div id="dup-box" class="dup-box"></div>
+          <button type="button" class="act act-dup" id="act-dup">Doublon — garder la sélection <kbd>D</kbd></button>
+          <button type="button" class="act act-new" id="act-new">Nouvelle œuvre — photo de référence <kbd>N</kbd></button>
+          <button type="button" class="act act-situ" id="act-situ">Autre photo à conserver… <kbd>A</kbd></button>
+          <div id="situ-panel" class="situ-panel" hidden>
+            <div class="types" id="situ-types"></div>
+            <p class="muted">Tableaux visibles sur la photo — cliquer pour les rattacher :</p>
+            <div class="works" id="situ-works"></div>
+            <label class="add">Ajouter des codes : <input type="text" id="situ-codes" placeholder="440 521…"></label>
+            <label class="add">Légende : <input type="text" id="situ-caption" placeholder="lieu, date, collectionneur…"></label>
+            <div class="situ-buttons">
+              <button type="button" class="act act-situ" id="situ-ok">Valider</button>
+              <button type="button" class="act" id="situ-later">On verra plus tard</button>
+            </div>
+          </div>
+          <button type="button" class="act act-ignore" id="act-ignore">Écarter (sans intérêt) <kbd>X</kbd></button>
+        </div>
+        <p id="status" class="muted" aria-live="polite"></p>
+      </aside>
+    </main>
+  </section>
+
+  <script src="baseart-config.js"></script>
+  <script src="editor-common.js?v=20250702-4"></script>
+  <script src="tri-photos.js?v=2"></script>
+</body>
+</html>
