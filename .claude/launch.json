@@ -4,8 +4,21 @@
     {
       "name": "baseart",
       "runtimeExecutable": "python3",
-      "runtimeArgs": ["-m", "http.server", "8765"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8765"
+      ],
       "port": 8765
+    },
+    {
+      "name": "tri-export",
+      "runtimeExecutable": "node",
+      "runtimeArgs": [
+        "/Users/etiennerenard/Documents/BaseArtImport/scripts/export-triage-server.mjs",
+        "/Users/etiennerenard/Documents/BaseArt_Export_iPhoto"
+      ],
+      "port": 47840
     }
   ]
 }

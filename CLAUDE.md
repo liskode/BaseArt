@@ -34,6 +34,9 @@ python3 -m http.server 8765   # puis http://localhost:8765/catalogue.html
 - `work_similarities` : doublons possibles (distance Vision), statut `open` / `dismissed`. Seuils : < 0,33 même œuvre ; 0,33–0,47 doublon possible ; > 0,47 œuvres différentes.
 
 ## Import d'un export de photothèque
-- `npm run export:triage -- <dossier>` construit `<dossier>/_baseart/triage.json` (analyses Vision dans `_baseart/` : matches.json, metrics.json, situ.json).
+- `npm run export:analyse -- <dossier>` : chaîne complète (Vision → qualité → scènes → `_baseart/triage.json`). Les décisions sont rattachées aux mêmes photos même si les numéros de carte changent. À relancer après un import pour rafraîchir les suggestions.
+- Outils Vision : `tools/vision/*.swift`, compilés à la demande par `scripts/vision.mjs` (cache des empreintes : `.cache/vision/`).
+- Page de tri : Importer (nouvelles œuvres, codes MS jamais réutilisés), Remplacer les photos cochées, Ajouter les autres photos (`media/photos/`), Publier. Originaux : `~/Documents/BaseArt-originaux/` ; archives : `~/Documents/BaseArt-archives/`.
+- Doublons entre œuvres : `npm run works:similar` remplit `work_similarities` ; outil ♊ de l'éditeur (routes works-api `/api/similar`, `/api/works/merge`).
 - `npm run export:tri -- <dossier>` : page de tri http://127.0.0.1:47840/, décisions dans `_baseart/decisions.json`.
 - Export actuel : `~/Documents/BaseArt_Export_iPhoto` (2108 photos, 14/10/2026).
