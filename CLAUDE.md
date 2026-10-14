@@ -30,5 +30,10 @@ python3 -m http.server 8765   # puis http://localhost:8765/catalogue.html
 
 ## Qualité photo, in situ, doublons (14/10/2026)
 - `works.image_quality` (0–100) + `image_quality_details` : `scripts/image-quality.mjs`, `npm run works:quality`. Pastille dans l'éditeur à côté du code MS.
-- `situ_photos` / `situ_photo_works` / `situ_photo_types` : photos d'atelier, d'exposition, chez un collectionneur, hors catalogue raisonné, rattachées à une ou plusieurs œuvres.
+- `work_photos` / `work_photo_links` / `work_photo_types` : « autres photos » des œuvres, hors catalogue raisonné (atelier, exposition, chez un collectionneur, combinaison de tableaux, détail, autre), rattachées à une ou plusieurs œuvres. Un diptyque / polyptyque est **une seule œuvre** (format DIPT, série POLYP) ; la photo d'un seul panneau est un détail.
 - `work_similarities` : doublons possibles (distance Vision), statut `open` / `dismissed`. Seuils : < 0,33 même œuvre ; 0,33–0,47 doublon possible ; > 0,47 œuvres différentes.
+
+## Import d'un export de photothèque
+- `npm run export:triage -- <dossier>` construit `<dossier>/_baseart/triage.json` (analyses Vision dans `_baseart/` : matches.json, metrics.json, situ.json).
+- `npm run export:tri -- <dossier>` : page de tri http://127.0.0.1:47840/, décisions dans `_baseart/decisions.json`.
+- Export actuel : `~/Documents/BaseArt_Export_iPhoto` (2108 photos, 14/10/2026).
