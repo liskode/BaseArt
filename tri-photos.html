@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tri des photos — BaseArt</title>
-  <link rel="stylesheet" href="tri-photos.css?v=3">
+  <link rel="stylesheet" href="tri-photos.css?v=4">
 </head>
 <body>
   <section id="login" class="login">
@@ -48,9 +48,19 @@
         <div id="meta" class="meta"></div>
         <div id="decided" class="decided" hidden></div>
 
-        <label class="title-field" id="title-field">Titre de l'œuvre
-          <input type="text" id="title-input" placeholder="Titre (modifiable)">
-        </label>
+        <div class="fiche" id="fiche">
+          <p class="fiche-head" id="fiche-head">Fiche</p>
+          <label class="f-wide">Titre <input type="text" id="f-title"></label>
+          <label>Année <input type="number" id="f-year" min="1900" max="2100" step="1"></label>
+          <label>Format <select id="f-format"></select></label>
+          <label>Technique <select id="f-technique"></select></label>
+          <label>Largeur (cm) <input type="number" id="f-width" min="0" step="0.5"></label>
+          <label>Hauteur (cm) <input type="number" id="f-height" min="0" step="0.5"></label>
+          <div class="f-wide">Séries
+            <div class="f-series" id="f-series"></div>
+            <select id="f-series-add" aria-label="Ajouter une série"></select>
+          </div>
+        </div>
 
         <div class="choices-actions" id="actions" role="radiogroup" aria-label="Que faire de cette photo ?">
           <button type="button" class="big-act" data-act="duplicate" role="radio" aria-checked="false">
@@ -93,6 +103,6 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=5"></script>
+  <script src="tri-photos.js?v=8"></script>
 </body>
 </html>

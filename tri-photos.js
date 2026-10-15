@@ -42,7 +42,8 @@
   let act = null; // action choisie
   let dupWork = null;
   let situ = null;
-  let titles = {}; // titre modifié par photo
+  let fiche = null; // fiche de la nouvelle œuvre (modifiable)
+  let lists = { series: [], formats: [], techniques: [] };
 
   // ---- API
   async function loadConfig() {
@@ -66,21 +67,28 @@
   function catalogueImg(id, full) {
     const media = mediaById.get(id);
     if (!media) return '';
-    if (full) return MEDIA_BASE + media.split('/').map(encodeURIComponent).join('/');
+    // Le site publie les noms de fichiers en forme Unicode composée (NFC) ; works.json peut contenir la forme décomposée
+    const enc = (p) => p.split('/').map((seg) => encodeURIComponent(seg.normalize('NFC'))).join('/');
+    if (full) return MEDIA_BASE + enc(media);
     const stem = media.replace(/^catalogue\//, '').replace(/\.[^.]+$/, '');
-    return MEDIA_BASE + 'catalogue/_thumbs/' + stem.split('/').map(encodeURIComponent).join('/') + '.webp';
+    return MEDIA_BASE + 'catalogue/_thumbs/' + enc(stem) + '.webp';
   }
   const qColor = (q) => 'hsl(' + Math.round(Math.max(0, Math.min(120, (q - 30) * 2))) + ', 75%, 45%)';
   const dot = (q) => (q == null ? null : el('span', { class: 'dot', style: 'background:' + qColor(q), title: 'Qualité ' + q + '/100' }));
 
-  /** Titre proposé pour une photo : titre décodé (meilleure photo) ou nom du fichier sans les codes. */
+  const m0 = (g) => g.meta || {};
+
+  /** Titre proposé pour une photo : titre décodé (meilleure photo), sinon le nom du fichier sans les codes. */
   function suggestedTitle(g, name) {
     if (name === g.photos[0].name && g.meta && g.meta.title) return g.meta.title;
-    return name
-      .replace(/\.[a-z0-9]+$/i, '')
-      .replace(/\.(jpe?g|png)$/i, '')
-      .replace(/^([-_ ]*[A-Z0-9]{3,5}[-_ :]+)+/, '')
-      .replace(/[-_]+/g, ' ')
+    const codes = new Set([...lists.series, ...lists.formats, ...lists.techniques].map((x) => x.code));
+    const stem = name.replace(/\.[a-z0-9]+$/i, '').replace(/\.(jpe?g|png)$/i, '');
+    if (/^(img|dsc|dscn|p\d{5,})/i.test(stem.trim())) return '';
+    return stem
+      .split(/[-_:]+/)
+      .map((t) => t.trim())
+      .filter((t) => t && !codes.has(t.toUpperCase()) && !/^(\d{1,4}|\(\d+\)|PHOTO|X|T|A|H|B|bis|ter)$/i.test(t))
+      .join(' ')
       .replace(/\s+/g, ' ')
       .trim();
   }
@@ -131,8 +139,23 @@
 
     // Présélection de l'action : décision existante, sinon proposition de l'analyse
     act = d.category || g.proposal || null;
-    titles = {};
-    if (d.title && d.best) titles[d.best] = d.title;
+    const dm = d.meta || {};
+    const has = (k) => Object.prototype.hasOwnProperty.call(dm, k);
+    fiche = {
+      title: d.title || null, // null : suit la photo sélectionnée
+      year: has('year') ? dm.year : m0(g).year || null,
+      format: has('format') ? dm.format : m0(g).format || '',
+      technique: has('technique') ? dm.technique : m0(g).technique || '',
+      width_cm: dm.width_cm || '',
+      height_cm: dm.height_cm || '',
+      series: new Set(Array.isArray(dm.series) ? dm.series : m0(g).series || []),
+    };
+    // Dimensions standard du format décodé, si aucune n'est saisie
+    const stdFormat = lists.formats.find((x) => x.code === fiche.format);
+    if (stdFormat && !fiche.width_cm && !fiche.height_cm && stdFormat.width_cm && stdFormat.height_cm) {
+      fiche.width_cm = stdFormat.width_cm;
+      fiche.height_cm = stdFormat.height_cm;
+    }
     situ = { type: d.situ_type || g.type_hint || 'X', works: new Set(d.situ_works || []), later: !!d.later };
     $('situ-caption').value = d.caption || '';
     $('situ-codes').value = '';
@@ -158,7 +181,7 @@
   function renderAll() {
     const g = list[pos];
     renderChoices(g);
-    renderTitle(g);
+    renderFiche(g);
     renderActions(g);
     renderDupPanel(g);
     renderSitu(g);
@@ -193,23 +216,69 @@
     ));
   }
 
-  function renderTitle(g) {
-    const input = $('title-input');
+  const option = (value, label, selected) => {
+    const o = el('option', { value, text: label });
+    if (selected) o.selected = true;
+    return o;
+  };
+
+  function renderFiche(g) {
     const locked = !!(decisions.get(g.id) || {}).result;
-    if (sel === 'catalogue') {
-      input.value = workById.get(dupWork)?.title || '';
-      input.disabled = true;
-      $('title-field').firstChild.textContent = 'Titre au catalogue ';
+    const box = $('fiche');
+    box.hidden = act === 'situ' || act === 'ignore';
+    if (box.hidden) return;
+    const fields = ['f-title', 'f-year', 'f-format', 'f-technique', 'f-width', 'f-height', 'f-series-add'];
+    if (act === 'duplicate') {
+      // Fiche existante : affichée pour comparaison, modifiable dans l'éditeur Œuvres
+      const w = workById.get(dupWork) || {};
+      box.classList.add('readonly');
+      $('fiche-head').replaceChildren('Fiche au catalogue — ' + (dupWork || ''), el('small', { text: ' (se modifie dans l\u2019éditeur Œuvres)' }));
+      $('f-title').value = w.title || '';
+      $('f-year').value = w.year || '';
+      $('f-format').replaceChildren(option('', '—', true));
+      $('f-technique').replaceChildren(option('', '—', true));
+      $('f-width').value = '';
+      $('f-height').value = '';
+      $('f-series').replaceChildren();
+      $('f-series-add').replaceChildren(option('', '—', true));
+      fields.forEach((id) => ($(id).disabled = true));
       return;
     }
-    const used = act === 'new';
-    $('title-field').firstChild.textContent = used
-      ? 'Titre de la nouvelle œuvre (modifiable) '
-      : 'Titre (utilisé seulement pour une nouvelle œuvre) ';
-    input.disabled = locked || !used;
-    input.value = titles[sel] !== undefined ? titles[sel] : suggestedTitle(g, sel);
+    box.classList.remove('readonly');
+    $('fiche-head').replaceChildren('Fiche de la nouvelle œuvre', el('small', { text: ' — vérifier et corriger si besoin' }));
+    fields.forEach((id) => ($(id).disabled = locked));
+    $('f-title').value = fiche.title !== null ? fiche.title : suggestedTitle(g, sel === 'catalogue' ? g.photos[0].name : sel);
+    $('f-year').value = fiche.year || '';
+    $('f-width').value = fiche.width_cm || '';
+    $('f-height').value = fiche.height_cm || '';
+    $('f-format').replaceChildren(option('', '— format —', !fiche.format),
+      ...lists.formats.map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), x.code === fiche.format)));
+    $('f-technique').replaceChildren(option('', '— technique —', !fiche.technique),
+      ...lists.techniques.map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), x.code === fiche.technique)));
+    $('f-series').replaceChildren(...[...fiche.series].sort().map((code) =>
+      el('button', { type: 'button', title: 'Retirer ' + code, disabled: locked, onclick: () => { fiche.series.delete(code); renderFiche(g); } }, code + ' ×')));
+    $('f-series-add').replaceChildren(option('', '+ ajouter une série', true),
+      ...lists.series.filter((x) => !fiche.series.has(x.code)).map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), false)));
   }
-  $('title-input').addEventListener('input', (e) => { if (sel !== 'catalogue') titles[sel] = e.target.value; });
+  $('f-title').addEventListener('input', (e) => { fiche.title = e.target.value; });
+  $('f-year').addEventListener('input', (e) => { fiche.year = e.target.value ? parseInt(e.target.value, 10) : null; });
+  $('f-width').addEventListener('input', (e) => { fiche.width_cm = e.target.value; });
+  $('f-height').addEventListener('input', (e) => { fiche.height_cm = e.target.value; });
+  $('f-technique').addEventListener('change', (e) => { fiche.technique = e.target.value; });
+  $('f-format').addEventListener('change', (e) => {
+    fiche.format = e.target.value;
+    // Dimensions standard du format, si elles ne sont pas encore saisies
+    const f = lists.formats.find((x) => x.code === fiche.format);
+    if (f && !fiche.width_cm && !fiche.height_cm && f.width_cm && f.height_cm) {
+      fiche.width_cm = f.width_cm;
+      fiche.height_cm = f.height_cm;
+      renderFiche(list[pos]);
+    }
+  });
+  $('f-series-add').addEventListener('change', (e) => {
+    if (e.target.value) fiche.series.add(e.target.value);
+    renderFiche(list[pos]);
+  });
 
   function renderActions(g) {
     const locked = !!(decisions.get(g.id) || {}).result;
@@ -301,9 +370,20 @@
     const g = list[pos];
     if ($('validate').disabled) return;
     let decision;
-    const title = sel !== 'catalogue' ? (titles[sel] !== undefined ? titles[sel] : suggestedTitle(g, sel)).trim() : undefined;
     if (act === 'duplicate') decision = { category: 'duplicate', work: dupWork, keep: sel };
-    else if (act === 'new') decision = { category: 'new', best: sel, title };
+    else if (act === 'new') decision = {
+      category: 'new',
+      best: sel,
+      title: (fiche.title !== null ? fiche.title : suggestedTitle(g, sel)).trim(),
+      meta: {
+        year: fiche.year || null,
+        format: fiche.format || null,
+        technique: fiche.technique || null,
+        width_cm: fiche.width_cm ? Number(fiche.width_cm) : null,
+        height_cm: fiche.height_cm ? Number(fiche.height_cm) : null,
+        series: [...fiche.series].sort(),
+      },
+    };
     else if (act === 'situ') decision = {
       category: 'situ', best: sel, situ_type: situ.type, situ_works: situ.later ? [] : [...situ.works],
       caption: $('situ-caption').value.trim(), later: situ.later,
@@ -363,6 +443,7 @@
     groups = j.export.triage.groups;
     decisions = new Map(j.decisions.map((d) => [d.group_id, d]));
     workById = new Map(j.works.map((w) => [w.id, w]));
+    lists = j.meta || lists;
     mediaById = new Map((worksJson.works || []).map((w) => [w.id, w.media]));
     document.title = 'Tri des photos — ' + j.export.label;
     buildList();
