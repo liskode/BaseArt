@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tri des photos — BaseArt</title>
-  <link rel="stylesheet" href="tri-photos.css?v=6">
+  <link rel="stylesheet" href="tri-photos.css?v=7">
 </head>
 <body>
   <section id="login" class="login">
@@ -26,6 +26,7 @@
         <option value="todo-duplicate">À traiter — doublons proposés</option>
         <option value="todo-new">À traiter — nouvelles œuvres proposées</option>
         <option value="todo-situ">À traiter — autres photos proposées</option>
+        <option value="unsure">À revoir — cas compliqués</option>
         <option value="done">Déjà traitées</option>
         <option value="all">Toutes</option>
       </select>
@@ -81,6 +82,16 @@
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
             <span><strong>Écarter / supprimer</strong><small>Photo sans intérêt pour le catalogue : elle ne sera pas importée.</small></span>
           </button>
+          <button type="button" class="big-act" data-act="unsure" role="radio" aria-checked="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.2v.3"/></svg>
+            <span><strong>Je ne sais pas</strong><small>Cas compliqué (plusieurs œuvres, vues différentes…) : on le met de côté pour s'en occuper plus tard.</small></span>
+          </button>
+        </div>
+
+        <div id="unsure-panel" class="sub-panel unsure-panel" hidden>
+          <label class="add">Note pour plus tard (facultatif)
+            <textarea id="unsure-note" rows="3" placeholder="ex. doublon de MS0890 + vue d'ensemble + une autre œuvre (photo 3)"></textarea>
+          </label>
         </div>
 
         <div id="dup-panel" class="sub-panel" hidden>
@@ -103,7 +114,7 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=12"></script>
+  <script src="tri-photos.js?v=13"></script>
   <script src="site-update.js?v=2" defer></script>
 </body>
 </html>

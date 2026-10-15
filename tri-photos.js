@@ -5,7 +5,7 @@
 
   const MEDIA_BASE = (window.BASEART_CONFIG && window.BASEART_CONFIG.mediaBase) || 'media/';
   const SITU_TYPES = [['D', 'Détail'], ['A', 'Atelier'], ['E', 'Exposition'], ['C', 'Chez un collectionneur'], ['M', 'Combinaison'], ['X', 'Autre']];
-  const ACT_KEYS = { d: 'duplicate', n: 'new', a: 'situ', x: 'ignore' };
+  const ACT_KEYS = { d: 'duplicate', n: 'new', a: 'situ', x: 'ignore', j: 'unsure' };
   const DONE_TEXT = {
     duplicate: (d) => 'Doublon de ' + d.work + (d.keep && d.keep !== 'catalogue' ? ' — la photo choisie remplacera celle du catalogue' : ' — la photo du catalogue est gardée') +
       (d.title !== undefined || d.meta ? ' ; fiche corrigée' : ''),
@@ -13,6 +13,7 @@
     situ: (d) => 'Autre photo (' + (SITU_TYPES.find((t) => t[0] === d.situ_type) || ['', 'autre'])[1].toLowerCase() + ')' +
       (d.situ_works && d.situ_works.length ? ' rattachée à ' + d.situ_works.join(', ') : d.later ? ' — rattachement plus tard' : ''),
     ignore: () => 'Écartée',
+    unsure: (d) => 'Cas compliqué, à revoir' + (d.note ? ' — « ' + d.note + ' »' : ''),
   };
 
   const $ = (id) => document.getElementById(id);
@@ -104,6 +105,7 @@
       const done = isDone(g);
       if (f === 'all') return true;
       if (f === 'done') return done;
+      if (f === 'unsure') return (decisions.get(g.id) || {}).decision?.category === 'unsure';
       if (done) return false;
       if (f === 'todo') return true;
       return g.proposal === f.replace('todo-', '');
@@ -112,7 +114,8 @@
   function updateProgress() {
     const done = groups.filter(isDone).length;
     $('progress-bar').style.width = (100 * done) / Math.max(1, groups.length) + '%';
-    $('progress-text').textContent = done + ' / ' + groups.length + ' traitées';
+    const unsure = groups.filter((g) => (decisions.get(g.id) || {}).decision?.category === 'unsure').length;
+    $('progress-text').textContent = done + ' / ' + groups.length + ' traitées' + (unsure ? ' (dont ' + unsure + ' à revoir)' : '');
     $('position').textContent = list.length ? pos + 1 + ' / ' + list.length : '0 / 0';
   }
 
@@ -167,6 +170,7 @@
     };
     loadDupFiche(d.category === 'duplicate' && d.work === dupWork ? d : null);
     $('situ-codes').value = '';
+    $('unsure-note').value = d.category === 'unsure' ? d.note || '' : '';
 
     const m = g.meta || {};
     $('meta').replaceChildren(
@@ -279,7 +283,7 @@
   function renderFiche(g) {
     const locked = !!(decisions.get(g.id) || {}).result;
     const box = $('fiche');
-    box.hidden = !act || act === 'ignore';
+    box.hidden = !act || act === 'ignore' || act === 'unsure';
     if (box.hidden) return;
     const mode = act === 'situ' ? 'situ' : 'work';
     for (const n of box.querySelectorAll('[data-mode]')) n.hidden = n.dataset.mode !== mode;
@@ -389,6 +393,7 @@
 
   function renderSitu(g) {
     $('situ-panel').hidden = act !== 'situ';
+    $('unsure-panel').hidden = act !== 'unsure';
     const ids = [...new Set([...situ.works, ...(g.situ_candidates || []).map((c) => c.work), ...(g.nearest || []).map((n) => n.work)])]
       .filter((id) => workById.has(id));
     $('situ-works').replaceChildren(...ids.map((id) => {
@@ -492,6 +497,7 @@
       category: 'situ', best: sel, situ_type: situ.type, situ_works: situ.later ? [] : [...situ.works],
       caption: situ.title.trim(), later: situ.later,
     };
+    else if (act === 'unsure') decision = { category: 'unsure', note: $('unsure-note').value.trim(), best: sel !== 'catalogue' ? sel : undefined };
     else decision = { category: 'ignore' };
     $('validate').disabled = true;
     $('status').textContent = 'Enregistrement…';
