@@ -106,3 +106,9 @@ kbd { border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; font-s
 #big { height: min(52vh, 640px); }
 .fiche .types { margin-top: 2px; }
 .fiche .edited { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+
+/* Agrandissement au survol des vignettes d'œuvres */
+.work-preview { position: fixed; z-index: 50; pointer-events: none; width: min(460px, 46vw); background: var(--card); border: 1px solid var(--line);
+  border-radius: 8px; padding: 6px; box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3); }
+.work-preview img { display: block; width: 100%; max-height: 60vh; object-fit: contain; background: #8881; border-radius: 4px; }
+.work-preview p { margin: 5px 2px 0; font-size: 13px; }

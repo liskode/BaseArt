@@ -381,7 +381,7 @@
       const w = workById.get(id);
       const n = near.find((x) => x.work === id);
       return el('button', {
-        type: 'button', class: 'work' + (id === dupWork ? ' dup-on' : ''), title: (w && w.title) || id,
+        type: 'button', class: 'work' + (id === dupWork ? ' dup-on' : ''), 'data-work': id,
         onclick: () => { dupWork = id; loadDupFiche(null); renderAll(); },
       }, el('img', { src: catalogueImg(id, false), alt: '' }), el('span', {}, id, n ? ' · ' + n.d.toFixed(2) : '', dot(w && w.image_quality)));
     }));
@@ -394,7 +394,7 @@
     $('situ-works').replaceChildren(...ids.map((id) => {
       const w = workById.get(id);
       return el('button', {
-        type: 'button', class: 'work' + (situ.works.has(id) ? ' on' : ''), title: (w && w.title) || id,
+        type: 'button', class: 'work' + (situ.works.has(id) ? ' on' : ''), 'data-work': id,
         onclick: () => { situ.works.has(id) ? situ.works.delete(id) : situ.works.add(id); situ.later = false; renderSitu(g); renderValidate(g); },
       }, el('img', { src: catalogueImg(id, false), alt: '', loading: 'lazy' }), el('span', {}, id));
     }));
@@ -430,6 +430,44 @@
     if (hint) $('status').textContent = hint;
     else if ($('status').textContent.startsWith('Choisissez')) $('status').textContent = '';
   }
+
+  // ---- Agrandissement au survol des vignettes d'œuvres du catalogue
+  const preview = el('div', { class: 'work-preview', hidden: true }, el('img', { alt: '' }), el('p'));
+  document.body.append(preview);
+  let lastMouse = null;
+  // L'image arrive après l'affichage : on repositionne quand elle est chargée (sa hauteur change)
+  preview.querySelector('img').addEventListener('load', () => { if (!preview.hidden && lastMouse) placePreview(lastMouse); });
+  function placePreview(e) {
+    lastMouse = { clientX: e.clientX, clientY: e.clientY };
+    const pad = 16;
+    const w = preview.offsetWidth;
+    const h = preview.offsetHeight;
+    let x = e.clientX - w - pad; // à gauche du curseur : les vignettes sont dans la colonne de droite
+    if (x < pad) x = Math.min(e.clientX + pad, window.innerWidth - w - pad);
+    const y = Math.max(pad, Math.min(e.clientY - h / 2, window.innerHeight - h - pad));
+    preview.style.left = x + 'px';
+    preview.style.top = y + 'px';
+  }
+  document.addEventListener('mouseover', (e) => {
+    const t = e.target instanceof Element ? e.target.closest('.work[data-work]') : null;
+    if (!t) return;
+    const id = t.dataset.work;
+    const w = workById.get(id) || {};
+    const img = preview.querySelector('img');
+    const src = catalogueImg(id, true);
+    if (!src) return;
+    if (img.getAttribute('src') !== src) img.src = src;
+    preview.querySelector('p').textContent = id + (w.title ? ' — ' + w.title : '') + (w.year ? ' (' + w.year + ')' : '');
+    preview.hidden = false;
+    placePreview(e);
+  });
+  document.addEventListener('mousemove', (e) => {
+    if (!preview.hidden) placePreview(e);
+  });
+  document.addEventListener('mouseout', (e) => {
+    const t = e.target instanceof Element ? e.target.closest('.work[data-work]') : null;
+    if (t && !(e.relatedTarget instanceof Element && t.contains(e.relatedTarget))) preview.hidden = true;
+  });
 
   // ---- Validation
   async function validate() {
