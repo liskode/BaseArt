@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tri des photos — BaseArt</title>
-  <link rel="stylesheet" href="tri-photos.css?v=2">
+  <link rel="stylesheet" href="tri-photos.css?v=3">
 </head>
 <body>
   <section id="login" class="login">
@@ -48,24 +48,44 @@
         <div id="meta" class="meta"></div>
         <div id="decided" class="decided" hidden></div>
 
-        <div id="actions" class="actions">
-          <div id="dup-box" class="dup-box"></div>
-          <button type="button" class="act act-dup" id="act-dup">Doublon — garder la sélection <kbd>D</kbd></button>
-          <button type="button" class="act act-new" id="act-new">Nouvelle œuvre — photo de référence <kbd>N</kbd></button>
-          <button type="button" class="act act-situ" id="act-situ">Autre photo à conserver… <kbd>A</kbd></button>
-          <div id="situ-panel" class="situ-panel" hidden>
-            <div class="types" id="situ-types"></div>
-            <p class="muted">Tableaux visibles sur la photo — cliquer pour les rattacher :</p>
-            <div class="works" id="situ-works"></div>
-            <label class="add">Ajouter des codes : <input type="text" id="situ-codes" placeholder="440 521…"></label>
-            <label class="add">Légende : <input type="text" id="situ-caption" placeholder="lieu, date, collectionneur…"></label>
-            <div class="situ-buttons">
-              <button type="button" class="act act-situ" id="situ-ok">Valider</button>
-              <button type="button" class="act" id="situ-later">On verra plus tard</button>
-            </div>
-          </div>
-          <button type="button" class="act act-ignore" id="act-ignore">Écarter (sans intérêt) <kbd>X</kbd></button>
+        <label class="title-field" id="title-field">Titre de l'œuvre
+          <input type="text" id="title-input" placeholder="Titre (modifiable)">
+        </label>
+
+        <div class="choices-actions" id="actions" role="radiogroup" aria-label="Que faire de cette photo ?">
+          <button type="button" class="big-act" data-act="duplicate" role="radio" aria-checked="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="12" height="14" rx="1.5"/><rect x="9" y="3" width="12" height="14" rx="1.5"/></svg>
+            <span><strong>Doublon</strong><small id="desc-duplicate">Cette œuvre est déjà au catalogue : on garde la photo sélectionnée.</small></span>
+          </button>
+          <button type="button" class="big-act" data-act="new" role="radio" aria-checked="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+            <span><strong>Nouvelle œuvre</strong><small>La photo sélectionnée devient la photo de référence d'une nouvelle fiche du catalogue.</small></span>
+          </button>
+          <button type="button" class="big-act" data-act="situ" role="radio" aria-checked="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>
+            <span><strong>Autre photo à conserver</strong><small>Détail, atelier, exposition, chez un collectionneur… rattachée à un ou plusieurs tableaux.</small></span>
+          </button>
+          <button type="button" class="big-act" data-act="ignore" role="radio" aria-checked="false">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
+            <span><strong>Écarter / supprimer</strong><small>Photo sans intérêt pour le catalogue : elle ne sera pas importée.</small></span>
+          </button>
         </div>
+
+        <div id="dup-panel" class="sub-panel" hidden>
+          <p class="muted">Œuvre du catalogue correspondante (cliquer pour changer) :</p>
+          <div id="dup-box" class="works"></div>
+        </div>
+
+        <div id="situ-panel" class="sub-panel situ-panel" hidden>
+          <div class="types" id="situ-types"></div>
+          <p class="muted">Tableaux visibles sur la photo — cliquer pour les rattacher :</p>
+          <div class="works" id="situ-works"></div>
+          <label class="add">Ajouter des codes : <input type="text" id="situ-codes" placeholder="440 521…"></label>
+          <label class="add">Légende : <input type="text" id="situ-caption" placeholder="lieu, date, collectionneur…"></label>
+          <label class="later"><input type="checkbox" id="situ-later"> Je ne sais pas encore : rattacher plus tard</label>
+        </div>
+
+        <button type="button" class="validate" id="validate">Valider le choix <kbd>Entrée</kbd></button>
         <p id="status" class="muted" aria-live="polite"></p>
       </aside>
     </main>
@@ -73,6 +93,6 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=2"></script>
+  <script src="tri-photos.js?v=5"></script>
 </body>
 </html>
