@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tri des photos — BaseArt</title>
-  <link rel="stylesheet" href="tri-photos.css?v=4">
+  <link rel="stylesheet" href="tri-photos.css?v=5">
 </head>
 <body>
   <section id="login" class="login">
@@ -41,26 +41,28 @@
         <img id="big" alt="">
         <figcaption id="big-caption" class="muted"></figcaption>
         <div id="choices" class="choices" aria-label="Photos disponibles : cliquer pour sélectionner"></div>
+        <div class="fiche" id="fiche">
+          <p class="fiche-head" id="fiche-head">Fiche</p>
+          <div class="f-wide" data-mode="situ">Catégorie
+            <div class="types" id="f-situ-types"></div>
+          </div>
+          <label class="f-wide">Titre <input type="text" id="f-title"></label>
+          <label data-mode="work">Année <input type="number" id="f-year" min="1900" max="2100" step="1"></label>
+          <label data-mode="work">Format <select id="f-format"></select></label>
+          <label data-mode="work">Technique <select id="f-technique"></select></label>
+          <label data-mode="work">Largeur (cm) <input type="number" id="f-width" min="0" step="0.5"></label>
+          <label data-mode="work">Hauteur (cm) <input type="number" id="f-height" min="0" step="0.5"></label>
+          <div class="f-wide" data-mode="work">Séries
+            <div class="f-series" id="f-series"></div>
+            <select id="f-series-add" aria-label="Ajouter une série"></select>
+          </div>
+        </div>
       </figure>
 
       <aside class="panel">
         <p id="proposal" class="proposal"></p>
         <div id="meta" class="meta"></div>
         <div id="decided" class="decided" hidden></div>
-
-        <div class="fiche" id="fiche">
-          <p class="fiche-head" id="fiche-head">Fiche</p>
-          <label class="f-wide">Titre <input type="text" id="f-title"></label>
-          <label>Année <input type="number" id="f-year" min="1900" max="2100" step="1"></label>
-          <label>Format <select id="f-format"></select></label>
-          <label>Technique <select id="f-technique"></select></label>
-          <label>Largeur (cm) <input type="number" id="f-width" min="0" step="0.5"></label>
-          <label>Hauteur (cm) <input type="number" id="f-height" min="0" step="0.5"></label>
-          <div class="f-wide">Séries
-            <div class="f-series" id="f-series"></div>
-            <select id="f-series-add" aria-label="Ajouter une série"></select>
-          </div>
-        </div>
 
         <div class="choices-actions" id="actions" role="radiogroup" aria-label="Que faire de cette photo ?">
           <button type="button" class="big-act" data-act="duplicate" role="radio" aria-checked="false">
@@ -87,11 +89,9 @@
         </div>
 
         <div id="situ-panel" class="sub-panel situ-panel" hidden>
-          <div class="types" id="situ-types"></div>
           <p class="muted">Tableaux visibles sur la photo — cliquer pour les rattacher :</p>
           <div class="works" id="situ-works"></div>
           <label class="add">Ajouter des codes : <input type="text" id="situ-codes" placeholder="440 521…"></label>
-          <label class="add">Légende : <input type="text" id="situ-caption" placeholder="lieu, date, collectionneur…"></label>
           <label class="later"><input type="checkbox" id="situ-later"> Je ne sais pas encore : rattacher plus tard</label>
         </div>
 
@@ -103,6 +103,6 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=8"></script>
+  <script src="tri-photos.js?v=10"></script>
 </body>
 </html>

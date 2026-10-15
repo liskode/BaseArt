@@ -7,7 +7,8 @@
   const SITU_TYPES = [['D', 'Détail'], ['A', 'Atelier'], ['E', 'Exposition'], ['C', 'Chez un collectionneur'], ['M', 'Combinaison'], ['X', 'Autre']];
   const ACT_KEYS = { d: 'duplicate', n: 'new', a: 'situ', x: 'ignore' };
   const DONE_TEXT = {
-    duplicate: (d) => 'Doublon de ' + d.work + (d.keep && d.keep !== 'catalogue' ? ' — la photo choisie remplacera celle du catalogue' : ' — la photo du catalogue est gardée'),
+    duplicate: (d) => 'Doublon de ' + d.work + (d.keep && d.keep !== 'catalogue' ? ' — la photo choisie remplacera celle du catalogue' : ' — la photo du catalogue est gardée') +
+      (d.title !== undefined || d.meta ? ' ; fiche corrigée' : ''),
     new: (d) => 'Nouvelle œuvre' + (d.title ? ' « ' + d.title + ' »' : ''),
     situ: (d) => 'Autre photo (' + (SITU_TYPES.find((t) => t[0] === d.situ_type) || ['', 'autre'])[1].toLowerCase() + ')' +
       (d.situ_works && d.situ_works.length ? ' rattachée à ' + d.situ_works.join(', ') : d.later ? ' — rattachement plus tard' : ''),
@@ -43,6 +44,8 @@
   let dupWork = null;
   let situ = null;
   let fiche = null; // fiche de la nouvelle œuvre (modifiable)
+  let ficheDup = null; // fiche de l'œuvre du catalogue (doublon), corrigible
+  let ficheDupBase = null; // valeurs actuelles au catalogue, pour ne garder que les corrections
   let lists = { series: [], formats: [], techniques: [] };
 
   // ---- API
@@ -139,10 +142,10 @@
 
     // Présélection de l'action : décision existante, sinon proposition de l'analyse
     act = d.category || g.proposal || null;
-    const dm = d.meta || {};
+    const dm = d.category === 'new' ? d.meta || {} : {};
     const has = (k) => Object.prototype.hasOwnProperty.call(dm, k);
     fiche = {
-      title: d.title || null, // null : suit la photo sélectionnée
+      title: d.category === 'new' && d.title ? d.title : null, // null : suit la photo sélectionnée
       year: has('year') ? dm.year : m0(g).year || null,
       format: has('format') ? dm.format : m0(g).format || '',
       technique: has('technique') ? dm.technique : m0(g).technique || '',
@@ -156,8 +159,13 @@
       fiche.width_cm = stdFormat.width_cm;
       fiche.height_cm = stdFormat.height_cm;
     }
-    situ = { type: d.situ_type || g.type_hint || 'X', works: new Set(d.situ_works || []), later: !!d.later };
-    $('situ-caption').value = d.caption || '';
+    situ = {
+      type: d.situ_type || g.type_hint || 'X',
+      works: new Set(d.situ_works || []),
+      later: !!d.later,
+      title: d.category === 'situ' ? d.caption || '' : '',
+    };
+    loadDupFiche(d.category === 'duplicate' && d.work === dupWork ? d : null);
     $('situ-codes').value = '';
 
     const m = g.meta || {};
@@ -222,61 +230,122 @@
     return o;
   };
 
+  /** Fiche du doublon : valeurs actuelles du catalogue, plus les corrections déjà enregistrées. */
+  function loadDupFiche(saved) {
+    const w = workById.get(dupWork) || {};
+    ficheDupBase = {
+      title: w.title || '',
+      year: w.year || null,
+      format: w.format_code || '',
+      technique: w.technique_code || '',
+      width_cm: w.width_cm || '',
+      height_cm: w.height_cm || '',
+      series: [...(w.series_codes || [])].sort(),
+    };
+    const em = (saved && saved.meta) || {};
+    const has = (k) => Object.prototype.hasOwnProperty.call(em, k);
+    ficheDup = {
+      title: saved && typeof saved.title === 'string' ? saved.title : ficheDupBase.title,
+      year: has('year') ? em.year : ficheDupBase.year,
+      format: has('format') ? em.format || '' : ficheDupBase.format,
+      technique: has('technique') ? em.technique || '' : ficheDupBase.technique,
+      width_cm: has('width_cm') ? em.width_cm || '' : ficheDupBase.width_cm,
+      height_cm: has('height_cm') ? em.height_cm || '' : ficheDupBase.height_cm,
+      series: new Set(has('series') ? em.series : ficheDupBase.series),
+    };
+  }
+
+  /** Corrections apportées à la fiche du catalogue (seulement les champs modifiés). */
+  function dupEdits() {
+    const b = ficheDupBase;
+    const f = ficheDup;
+    const meta = {};
+    const same = (x, y) => String(x ?? '') === String(y ?? '');
+    if (!same(f.year, b.year)) meta.year = f.year || null;
+    if (!same(f.format, b.format)) meta.format = f.format || null;
+    if (!same(f.technique, b.technique)) meta.technique = f.technique || null;
+    if (!same(f.width_cm, b.width_cm)) meta.width_cm = f.width_cm ? Number(f.width_cm) : null;
+    if (!same(f.height_cm, b.height_cm)) meta.height_cm = f.height_cm ? Number(f.height_cm) : null;
+    const series = [...f.series].sort();
+    if (series.join(',') !== b.series.join(',')) meta.series = series;
+    const out = {};
+    if (f.title.trim() !== b.title.trim()) out.title = f.title.trim();
+    if (Object.keys(meta).length) out.meta = meta;
+    return out;
+  }
+
+  const currentFiche = () => (act === 'duplicate' ? ficheDup : fiche);
+
   function renderFiche(g) {
     const locked = !!(decisions.get(g.id) || {}).result;
     const box = $('fiche');
-    box.hidden = act === 'situ' || act === 'ignore';
+    box.hidden = !act || act === 'ignore';
     if (box.hidden) return;
-    const fields = ['f-title', 'f-year', 'f-format', 'f-technique', 'f-width', 'f-height', 'f-series-add'];
-    if (act === 'duplicate') {
-      // Fiche existante : affichée pour comparaison, modifiable dans l'éditeur Œuvres
-      const w = workById.get(dupWork) || {};
-      box.classList.add('readonly');
-      $('fiche-head').replaceChildren('Fiche au catalogue — ' + (dupWork || ''), el('small', { text: ' (se modifie dans l\u2019éditeur Œuvres)' }));
-      $('f-title').value = w.title || '';
-      $('f-year').value = w.year || '';
-      $('f-format').replaceChildren(option('', '—', true));
-      $('f-technique').replaceChildren(option('', '—', true));
-      $('f-width').value = '';
-      $('f-height').value = '';
-      $('f-series').replaceChildren();
-      $('f-series-add').replaceChildren(option('', '—', true));
-      fields.forEach((id) => ($(id).disabled = true));
+    const mode = act === 'situ' ? 'situ' : 'work';
+    for (const n of box.querySelectorAll('[data-mode]')) n.hidden = n.dataset.mode !== mode;
+    box.querySelectorAll('input, select').forEach((n) => (n.disabled = locked));
+
+    if (mode === 'situ') {
+      $('fiche-head').replaceChildren('Autre photo', el('small', { text: ' — catégorie et titre' }));
+      $('f-situ-types').replaceChildren(...SITU_TYPES.map(([code, label]) =>
+        el('button', { type: 'button', disabled: locked, 'aria-pressed': String(situ.type === code), text: label, onclick: () => { situ.type = code; renderFiche(g); } })
+      ));
+      $('f-title').value = situ.title;
+      $('f-title').placeholder = 'ex. Exposition galerie Nicole Ferry, 1987';
       return;
     }
-    box.classList.remove('readonly');
-    $('fiche-head').replaceChildren('Fiche de la nouvelle œuvre', el('small', { text: ' — vérifier et corriger si besoin' }));
-    fields.forEach((id) => ($(id).disabled = locked));
-    $('f-title').value = fiche.title !== null ? fiche.title : suggestedTitle(g, sel === 'catalogue' ? g.photos[0].name : sel);
-    $('f-year').value = fiche.year || '';
-    $('f-width').value = fiche.width_cm || '';
-    $('f-height').value = fiche.height_cm || '';
-    $('f-format').replaceChildren(option('', '— format —', !fiche.format),
-      ...lists.formats.map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), x.code === fiche.format)));
-    $('f-technique').replaceChildren(option('', '— technique —', !fiche.technique),
-      ...lists.techniques.map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), x.code === fiche.technique)));
-    $('f-series').replaceChildren(...[...fiche.series].sort().map((code) =>
-      el('button', { type: 'button', title: 'Retirer ' + code, disabled: locked, onclick: () => { fiche.series.delete(code); renderFiche(g); } }, code + ' ×')));
-    $('f-series-add').replaceChildren(option('', '+ ajouter une série', true),
-      ...lists.series.filter((x) => !fiche.series.has(x.code)).map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), false)));
-  }
-  $('f-title').addEventListener('input', (e) => { fiche.title = e.target.value; });
-  $('f-year').addEventListener('input', (e) => { fiche.year = e.target.value ? parseInt(e.target.value, 10) : null; });
-  $('f-width').addEventListener('input', (e) => { fiche.width_cm = e.target.value; });
-  $('f-height').addEventListener('input', (e) => { fiche.height_cm = e.target.value; });
-  $('f-technique').addEventListener('change', (e) => { fiche.technique = e.target.value; });
-  $('f-format').addEventListener('change', (e) => {
-    fiche.format = e.target.value;
-    // Dimensions standard du format, si elles ne sont pas encore saisies
-    const f = lists.formats.find((x) => x.code === fiche.format);
-    if (f && !fiche.width_cm && !fiche.height_cm && f.width_cm && f.height_cm) {
-      fiche.width_cm = f.width_cm;
-      fiche.height_cm = f.height_cm;
-      renderFiche(list[pos]);
+
+    const f = currentFiche();
+    if (act === 'duplicate') {
+      $('fiche-head').replaceChildren('Fiche au catalogue — ' + (dupWork || ''), el('small', { text: ' — vos corrections seront appliquées à cette fiche' }));
+    } else {
+      $('fiche-head').replaceChildren('Fiche de la nouvelle œuvre', el('small', { text: ' — vérifier et corriger si besoin' }));
     }
+    $('f-title').placeholder = 'Titre de l\u2019œuvre';
+    $('f-title').value = act === 'duplicate' ? f.title : f.title !== null ? f.title : suggestedTitle(g, sel === 'catalogue' ? g.photos[0].name : sel);
+    $('f-year').value = f.year || '';
+    $('f-width').value = f.width_cm || '';
+    $('f-height').value = f.height_cm || '';
+    $('f-format').replaceChildren(option('', '— format —', !f.format),
+      ...lists.formats.map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), x.code === f.format)));
+    $('f-technique').replaceChildren(option('', '— technique —', !f.technique),
+      ...lists.techniques.map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), x.code === f.technique)));
+    $('f-series').replaceChildren(...[...f.series].sort().map((code) =>
+      el('button', { type: 'button', title: 'Retirer ' + code, disabled: locked, onclick: () => { f.series.delete(code); renderFiche(g); } }, code + ' ×')));
+    $('f-series-add').replaceChildren(option('', '+ ajouter une série', true),
+      ...lists.series.filter((x) => !f.series.has(x.code)).map((x) => option(x.code, x.code + (x.label ? ' — ' + x.label : ''), false)));
+    // Doublon : champs corrigés par rapport au catalogue mis en évidence
+    const edits = act === 'duplicate' ? dupEdits() : {};
+    const changed = new Set([...(edits.title !== undefined ? ['title'] : []), ...Object.keys(edits.meta || {})]);
+    const fieldOf = { title: 'f-title', year: 'f-year', format: 'f-format', technique: 'f-technique', width_cm: 'f-width', height_cm: 'f-height', series: 'f-series-add' };
+    for (const [k, id] of Object.entries(fieldOf)) $(id).classList.toggle('edited', changed.has(k));
+  }
+  $('f-title').addEventListener('input', (e) => {
+    if (act === 'situ') situ.title = e.target.value;
+    else currentFiche().title = e.target.value;
+    if (act === 'duplicate') $('f-title').classList.toggle('edited', ficheDup.title.trim() !== ficheDupBase.title.trim());
+  });
+  const onField = (key, parse) => (e) => {
+    currentFiche()[key] = parse(e.target.value);
+    if (act === 'duplicate') renderFiche(list[pos]);
+  };
+  $('f-year').addEventListener('change', onField('year', (v) => (v ? parseInt(v, 10) : null)));
+  $('f-width').addEventListener('change', onField('width_cm', (v) => v));
+  $('f-height').addEventListener('change', onField('height_cm', (v) => v));
+  $('f-technique').addEventListener('change', onField('technique', (v) => v));
+  $('f-format').addEventListener('change', (e) => {
+    const f = currentFiche();
+    f.format = e.target.value;
+    // Dimensions standard du format, si elles ne sont pas encore saisies
+    const std = lists.formats.find((x) => x.code === f.format);
+    if (std && !f.width_cm && !f.height_cm && std.width_cm && std.height_cm) {
+      f.width_cm = std.width_cm;
+      f.height_cm = std.height_cm;
+    }
+    renderFiche(list[pos]);
   });
   $('f-series-add').addEventListener('change', (e) => {
-    if (e.target.value) fiche.series.add(e.target.value);
+    if (e.target.value) currentFiche().series.add(e.target.value);
     renderFiche(list[pos]);
   });
 
@@ -285,8 +354,8 @@
     for (const b of document.querySelectorAll('.big-act')) {
       const a = b.dataset.act;
       b.setAttribute('aria-checked', String(act === a));
-      // La photo du catalogue ne peut servir qu'au choix « Doublon »
-      b.disabled = locked || (a === 'duplicate' && !dupWork) || (sel === 'catalogue' && a !== 'duplicate');
+      // La photo du catalogue ne peut pas devenir une nouvelle œuvre ni une autre photo ; « écarter » reste possible
+      b.disabled = locked || (a === 'duplicate' && !dupWork) || (sel === 'catalogue' && (a === 'new' || a === 'situ'));
       const strong = b.querySelector('strong');
       strong.querySelector('.proposed')?.remove();
       if (a === g.proposal) strong.append(el('span', { class: 'proposed', text: 'proposé' }));
@@ -313,16 +382,13 @@
       const n = near.find((x) => x.work === id);
       return el('button', {
         type: 'button', class: 'work' + (id === dupWork ? ' dup-on' : ''), title: (w && w.title) || id,
-        onclick: () => { dupWork = id; renderAll(); },
+        onclick: () => { dupWork = id; loadDupFiche(null); renderAll(); },
       }, el('img', { src: catalogueImg(id, false), alt: '' }), el('span', {}, id, n ? ' · ' + n.d.toFixed(2) : '', dot(w && w.image_quality)));
     }));
   }
 
   function renderSitu(g) {
     $('situ-panel').hidden = act !== 'situ';
-    $('situ-types').replaceChildren(...SITU_TYPES.map(([code, label]) =>
-      el('button', { type: 'button', 'aria-pressed': String(situ.type === code), text: label, onclick: () => { situ.type = code; renderSitu(g); } })
-    ));
     const ids = [...new Set([...situ.works, ...(g.situ_candidates || []).map((c) => c.work), ...(g.nearest || []).map((n) => n.work)])]
       .filter((id) => workById.has(id));
     $('situ-works').replaceChildren(...ids.map((id) => {
@@ -370,7 +436,7 @@
     const g = list[pos];
     if ($('validate').disabled) return;
     let decision;
-    if (act === 'duplicate') decision = { category: 'duplicate', work: dupWork, keep: sel };
+    if (act === 'duplicate') decision = { category: 'duplicate', work: dupWork, keep: sel, ...dupEdits() };
     else if (act === 'new') decision = {
       category: 'new',
       best: sel,
@@ -386,7 +452,7 @@
     };
     else if (act === 'situ') decision = {
       category: 'situ', best: sel, situ_type: situ.type, situ_works: situ.later ? [] : [...situ.works],
-      caption: $('situ-caption').value.trim(), later: situ.later,
+      caption: situ.title.trim(), later: situ.later,
     };
     else decision = { category: 'ignore' };
     $('validate').disabled = true;
