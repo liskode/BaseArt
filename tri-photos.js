@@ -106,6 +106,10 @@
       if (f === 'all') return true;
       if (f === 'done') return done;
       if (f === 'unsure') return (decisions.get(g.id) || {}).decision?.category === 'unsure';
+      if (f === 'later') {
+        const d = (decisions.get(g.id) || {}).decision || {};
+        return d.category === 'situ' && d.later === true && !(decisions.get(g.id) || {}).result;
+      }
       if (done) return false;
       if (f === 'todo') return true;
       return g.proposal === f.replace('todo-', '');
@@ -115,7 +119,9 @@
     const done = groups.filter(isDone).length;
     $('progress-bar').style.width = (100 * done) / Math.max(1, groups.length) + '%';
     const unsure = groups.filter((g) => (decisions.get(g.id) || {}).decision?.category === 'unsure').length;
-    $('progress-text').textContent = done + ' / ' + groups.length + ' traitées' + (unsure ? ' (dont ' + unsure + ' à revoir)' : '');
+    const later = groups.filter((g) => { const d = (decisions.get(g.id) || {}).decision || {}; return d.category === 'situ' && d.later === true; }).length;
+    const extra = [unsure ? unsure + ' à revoir' : '', later ? later + ' à rattacher' : ''].filter(Boolean).join(', ');
+    $('progress-text').textContent = done + ' / ' + groups.length + ' traitées' + (extra ? ' (dont ' + extra + ')' : '');
     $('position').textContent = list.length ? pos + 1 + ' / ' + list.length : '0 / 0';
   }
 
@@ -562,8 +568,9 @@
     try {
       const j = await api('/api/triage/decision', { export: exportId, group: g.id, decision, replace_all: true });
       decisions.set(g.id, { ...(decisions.get(g.id) || {}), decision: j.decision });
-      if ($('filter').value.startsWith('todo')) {
-        buildList(); // la carte décidée sort de la liste « à traiter »
+      const fv = $('filter').value;
+      if (fv.startsWith('todo') || fv === 'later' || fv === 'unsure') {
+        buildList(); // la carte décidée sort de la liste (à traiter, à rattacher, à revoir) si elle n'y correspond plus
         pos = Math.min(pos, Math.max(0, list.length - 1));
       } else {
         pos = Math.min(pos + 1, list.length - 1);

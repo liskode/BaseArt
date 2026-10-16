@@ -26,6 +26,7 @@
         <option value="todo-duplicate">À traiter — doublons proposés</option>
         <option value="todo-new">À traiter — nouvelles œuvres proposées</option>
         <option value="todo-situ">À traiter — autres photos proposées</option>
+        <option value="later">Autres photos à rattacher</option>
         <option value="unsure">À revoir — cas compliqués</option>
         <option value="done">Déjà traitées</option>
         <option value="all">Toutes</option>
@@ -107,7 +108,7 @@
           <p class="muted">Tableaux visibles sur la photo — cliquer pour les rattacher :</p>
           <div class="works" id="situ-works"></div>
           <label class="add">Ajouter des codes : <input type="text" id="situ-codes" placeholder="440 521…"></label>
-          <label class="later"><input type="checkbox" id="situ-later"> Je ne sais pas encore : rattacher plus tard</label>
+          <label class="later"><input type="checkbox" id="situ-later"> Je ne sais pas encore : rattacher plus tard (la photo attend dans le filtre « Autres photos à rattacher »)</label>
         </div>
 
         <button type="button" class="validate" id="validate">Valider le choix <kbd>Entrée</kbd></button>
@@ -118,7 +119,7 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=16"></script>
+  <script src="tri-photos.js?v=18"></script>
   <script src="site-update.js?v=2" defer></script>
 </body>
 </html>
