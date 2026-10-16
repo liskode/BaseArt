@@ -190,14 +190,38 @@
     renderAll();
   }
 
+  // Précharge la photo nette de la carte suivante : le passage à la suivante est alors immédiat
+  const prefetched = new Set();
+  function prefetchNext() {
+    const next = list[pos + 1];
+    if (!next) return;
+    const url = exportImg(next.photos[0], 'md');
+    if (prefetched.has(url)) return;
+    prefetched.add(url);
+    new Image().src = url;
+  }
+
   function renderAll() {
     const g = list[pos];
+    setTimeout(prefetchNext, 300);
     renderChoices(g);
     renderFiche(g);
     renderActions(g);
     renderDupPanel(g);
     renderSitu(g);
     renderValidate(g);
+  }
+
+  // Grande image : la vignette (déjà chargée) s'affiche tout de suite, la version nette la remplace dès qu'elle arrive.
+  // Évite de laisser voir la photo précédente pendant le chargement.
+  let bigWanted = '';
+  function showBig(item) {
+    if (bigWanted === item.big) return;
+    bigWanted = item.big;
+    $('big').src = item.thumb;
+    const full = new Image();
+    full.onload = () => { if (bigWanted === item.big) $('big').src = item.big; };
+    full.src = item.big;
   }
 
   function renderChoices(g) {
@@ -214,7 +238,7 @@
     }
     const current = items.find((i) => i.key === sel) || items.find((i) => !i.catalogue) || items[0];
     sel = current.key;
-    if ($('big').getAttribute('src') !== current.big) $('big').src = current.big;
+    showBig(current);
     $('big').alt = current.label;
     $('big-caption').replaceChildren(...[current.label + (current.size ? ' — ' + current.size : ''), dot(current.q)].filter(Boolean));
     $('choices').replaceChildren(...items.map((i) =>
@@ -283,7 +307,7 @@
   function renderFiche(g) {
     const locked = !!(decisions.get(g.id) || {}).result;
     const box = $('fiche');
-    box.hidden = !act || act === 'ignore' || act === 'unsure';
+    box.hidden = !act || act === 'ignore' || act === 'unsure' || (act === 'duplicate' && !dupWork);
     if (box.hidden) return;
     const mode = act === 'situ' ? 'situ' : 'work';
     for (const n of box.querySelectorAll('[data-mode]')) n.hidden = n.dataset.mode !== mode;
@@ -359,14 +383,26 @@
       const a = b.dataset.act;
       b.setAttribute('aria-checked', String(act === a));
       // La photo du catalogue ne peut pas devenir une nouvelle œuvre ni une autre photo ; « écarter » reste possible
-      b.disabled = locked || (a === 'duplicate' && !dupWork) || (sel === 'catalogue' && (a === 'new' || a === 'situ'));
+      // « Doublon » toujours possible : si l'œuvre n'a pas été reconnue, on saisit son code
+      b.disabled = locked || (sel === 'catalogue' && (a === 'new' || a === 'situ'));
       const strong = b.querySelector('strong');
       strong.querySelector('.proposed')?.remove();
       if (a === g.proposal) strong.append(el('span', { class: 'proposed', text: 'proposé' }));
     }
+    // Ce que chaque choix fait des photos de la carte
+    const n = g.photos.length;
+    const others = n === 2 ? ' L\u2019autre photo du groupe est ignorée.' : n > 2 ? ' Les ' + (n - 1) + ' autres photos du groupe sont ignorées.' : '';
     $('desc-duplicate').textContent = dupWork
-      ? 'Déjà au catalogue (' + dupWork + ') : ' + (sel === 'catalogue' ? 'on garde la photo du catalogue.' : 'la photo sélectionnée remplacera celle du catalogue.')
-      : 'Aucune œuvre proche trouvée au catalogue.';
+      ? 'Déjà au catalogue (' + dupWork + ') : ' + (sel === 'catalogue' ? 'on garde la photo du catalogue, aucune photo n\u2019est importée.' : 'la photo sélectionnée remplacera celle du catalogue.' + others)
+      : 'Œuvre déjà au catalogue mais non reconnue : choisir ce bouton puis indiquer son code.';
+    $('desc-new').textContent = 'La photo sélectionnée devient la photo de référence d\u2019une nouvelle fiche du catalogue.' + others;
+    $('desc-situ').textContent = 'Détail, atelier, exposition, chez un collectionneur… La photo sélectionnée est rattachée à un ou plusieurs tableaux.' + others;
+    $('desc-ignore').textContent = n > 1
+      ? 'Aucune des ' + n + ' photos de ce groupe ne sera importée.'
+      : 'Photo sans intérêt pour le catalogue : elle ne sera pas importée.';
+    const note = $('group-note');
+    note.hidden = n < 2;
+    note.textContent = n > 1 ? 'Ces ' + n + ' photos montrent la même œuvre (selon l\u2019analyse) : seule la photo sélectionnée sera conservée.' : '';
   }
 
   function selectAct(a) {
@@ -379,6 +415,10 @@
 
   function renderDupPanel(g) {
     $('dup-panel').hidden = act !== 'duplicate';
+    $('dup-help').textContent = dupWork
+      ? 'Œuvre du catalogue correspondante (cliquer pour changer) :'
+      : 'Aucune œuvre proche n\u2019a été trouvée : indiquez le code de l\u2019œuvre au catalogue.';
+    $('dup-code').value = '';
     const near = (g.nearest || []).filter((n) => n.d < 0.47 && workById.has(n.work));
     const candidates = [...new Set([dupWork, g.work, ...near.map((n) => n.work)].filter(Boolean))].slice(0, 4);
     $('dup-box').replaceChildren(...candidates.map((id) => {
@@ -426,7 +466,10 @@
     const locked = !!(decisions.get(g.id) || {}).result;
     let ok = !!act && !locked;
     let hint = '';
-    if (act === 'duplicate' && !dupWork) ok = false;
+    if (act === 'duplicate' && !dupWork) {
+      ok = false;
+      hint = 'Indiquez le code de l\u2019œuvre au catalogue (ex. 440).';
+    }
     if (act === 'situ' && !situ.works.size && !situ.later) {
       ok = false;
       hint = 'Choisissez au moins un tableau, ou cochez « rattacher plus tard ».';
@@ -435,6 +478,21 @@
     if (hint) $('status').textContent = hint;
     else if ($('status').textContent.startsWith('Choisissez')) $('status').textContent = '';
   }
+
+  // Code saisi à la main : l'œuvre devient celle du doublon (photo et fiche affichées pour comparaison)
+  $('dup-code').addEventListener('change', (e) => {
+    const raw = e.target.value.trim();
+    if (!raw) return;
+    const id = 'MS' + raw.replace(/^MS/i, '').padStart(4, '0');
+    if (!workById.has(id)) {
+      $('status').textContent = 'Code inconnu : ' + id;
+      return;
+    }
+    dupWork = id;
+    loadDupFiche(null);
+    renderAll();
+    $('status').textContent = '';
+  });
 
   // ---- Agrandissement au survol des vignettes d'œuvres du catalogue
   const preview = el('div', { class: 'work-preview', hidden: true }, el('img', { alt: '' }), el('p'));

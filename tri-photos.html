@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tri des photos — BaseArt</title>
-  <link rel="stylesheet" href="tri-photos.css?v=7">
+  <link rel="stylesheet" href="tri-photos.css?v=8">
 </head>
 <body>
   <section id="login" class="login">
@@ -41,6 +41,7 @@
       <figure class="viewer">
         <img id="big" alt="">
         <figcaption id="big-caption" class="muted"></figcaption>
+        <p id="group-note" class="group-note" hidden></p>
         <div id="choices" class="choices" aria-label="Photos disponibles : cliquer pour sélectionner"></div>
         <div class="fiche" id="fiche">
           <p class="fiche-head" id="fiche-head">Fiche</p>
@@ -72,15 +73,15 @@
           </button>
           <button type="button" class="big-act" data-act="new" role="radio" aria-checked="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
-            <span><strong>Nouvelle œuvre</strong><small>La photo sélectionnée devient la photo de référence d'une nouvelle fiche du catalogue.</small></span>
+            <span><strong>Nouvelle œuvre</strong><small id="desc-new">La photo sélectionnée devient la photo de référence d'une nouvelle fiche du catalogue.</small></span>
           </button>
           <button type="button" class="big-act" data-act="situ" role="radio" aria-checked="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-8 8"/></svg>
-            <span><strong>Autre photo à conserver</strong><small>Détail, atelier, exposition, chez un collectionneur… rattachée à un ou plusieurs tableaux.</small></span>
+            <span><strong>Autre photo à conserver</strong><small id="desc-situ">Détail, atelier, exposition, chez un collectionneur… rattachée à un ou plusieurs tableaux.</small></span>
           </button>
           <button type="button" class="big-act" data-act="ignore" role="radio" aria-checked="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13M10 11v6M14 11v6"/></svg>
-            <span><strong>Écarter / supprimer</strong><small>Photo sans intérêt pour le catalogue : elle ne sera pas importée.</small></span>
+            <span><strong>Écarter / supprimer</strong><small id="desc-ignore">Photo sans intérêt pour le catalogue : elle ne sera pas importée.</small></span>
           </button>
           <button type="button" class="big-act" data-act="unsure" role="radio" aria-checked="false">
             <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.2v.3"/></svg>
@@ -95,8 +96,11 @@
         </div>
 
         <div id="dup-panel" class="sub-panel" hidden>
-          <p class="muted">Œuvre du catalogue correspondante (cliquer pour changer) :</p>
+          <p class="muted" id="dup-help">Œuvre du catalogue correspondante (cliquer pour changer) :</p>
           <div id="dup-box" class="works"></div>
+          <label class="add">Code de l'œuvre au catalogue, si elle n'est pas proposée :
+            <input type="text" id="dup-code" placeholder="ex. 440 ou MS0440">
+          </label>
         </div>
 
         <div id="situ-panel" class="sub-panel situ-panel" hidden>
@@ -114,7 +118,7 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=13"></script>
+  <script src="tri-photos.js?v=16"></script>
   <script src="site-update.js?v=2" defer></script>
 </body>
 </html>
