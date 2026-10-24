@@ -162,12 +162,6 @@
       height_cm: dm.height_cm || '',
       series: new Set(Array.isArray(dm.series) ? dm.series : m0(g).series || []),
     };
-    // Dimensions standard du format décodé, si aucune n'est saisie
-    const stdFormat = lists.formats.find((x) => x.code === fiche.format);
-    if (stdFormat && !fiche.width_cm && !fiche.height_cm && stdFormat.width_cm && stdFormat.height_cm) {
-      fiche.width_cm = stdFormat.width_cm;
-      fiche.height_cm = stdFormat.height_cm;
-    }
     situ = {
       type: d.situ_type || g.type_hint || 'X',
       works: new Set(d.situ_works || []),
@@ -353,6 +347,8 @@
     const changed = new Set([...(edits.title !== undefined ? ['title'] : []), ...Object.keys(edits.meta || {})]);
     const fieldOf = { title: 'f-title', year: 'f-year', format: 'f-format', technique: 'f-technique', width_cm: 'f-width', height_cm: 'f-height', series: 'f-series-add' };
     for (const [k, id] of Object.entries(fieldOf)) $(id).classList.toggle('edited', changed.has(k));
+    // Largeur / hauteur : seulement pour un hors format (les autres formats ont des dimensions standard)
+    for (const n of box.querySelectorAll('.f-dims')) n.hidden = f.format !== 'HOFO';
   }
   $('f-title').addEventListener('input', (e) => {
     if (act === 'situ') situ.title = e.target.value;
@@ -370,12 +366,6 @@
   $('f-format').addEventListener('change', (e) => {
     const f = currentFiche();
     f.format = e.target.value;
-    // Dimensions standard du format, si elles ne sont pas encore saisies
-    const std = lists.formats.find((x) => x.code === f.format);
-    if (std && !f.width_cm && !f.height_cm && std.width_cm && std.height_cm) {
-      f.width_cm = std.width_cm;
-      f.height_cm = std.height_cm;
-    }
     renderFiche(list[pos]);
   });
   $('f-series-add').addEventListener('change', (e) => {
@@ -552,8 +542,9 @@
         year: fiche.year || null,
         format: fiche.format || null,
         technique: fiche.technique || null,
-        width_cm: fiche.width_cm ? Number(fiche.width_cm) : null,
-        height_cm: fiche.height_cm ? Number(fiche.height_cm) : null,
+        // Dimensions saisies seulement pour un hors format
+        width_cm: fiche.format === 'HOFO' && fiche.width_cm ? Number(fiche.width_cm) : null,
+        height_cm: fiche.format === 'HOFO' && fiche.height_cm ? Number(fiche.height_cm) : null,
         series: [...fiche.series].sort(),
       },
     };

@@ -118,3 +118,42 @@ kbd { border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; font-s
 .unsure-panel textarea { font: inherit; font-size: 13px; padding: 6px 8px; border: 1px solid var(--line); border-radius: 5px; background: var(--card); color: var(--fg); resize: vertical; }
 
 .group-note { margin: 4px 2px 6px; font-size: 13px; color: var(--fg); background: #8881; border-left: 3px solid var(--accent); padding: 4px 8px; border-radius: 3px; }
+
+/* ---- Mise en page « tout à l'écran » (MacBook 13" en plein écran) ---- */
+@media (min-width: 900px) {
+  html, body { height: 100%; }
+  body { overflow: hidden; }
+  .app { height: 100vh; display: flex; flex-direction: column; }
+  .top { padding: 6px 12px; gap: 6px 12px; flex: none; }
+  h1 { font-size: 16px; }
+  .stage { flex: 1 1 auto; min-height: 0; grid-template-columns: minmax(0, 1fr) 340px; gap: 10px; padding: 8px 10px 10px; }
+  .viewer { display: flex; flex-direction: column; min-height: 0; padding: 8px; overflow: hidden; }
+  #big { flex: 1 1 auto; height: auto; min-height: 140px; }
+  #big-caption { margin: 3px 2px 0; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: none; }
+  .group-note { margin: 3px 0; padding: 2px 8px; font-size: 12px; flex: none; }
+  .choices { flex: none; flex-wrap: nowrap; overflow-x: auto; margin-top: 4px; padding-bottom: 2px; }
+  .fiche { flex: none; margin-top: 6px; padding: 6px 8px; gap: 4px 8px; grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .fiche-head { font-size: 13px; }
+  .fiche .f-title { grid-column: span 3; }
+  .fiche .f-wide { grid-column: 1 / -1; }
+  .fiche input, .fiche select { font-size: 13px; padding: 3px 6px; }
+  .fiche .f-series-row { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 6px; }
+  .fiche .f-series-row select { width: auto; }
+  .panel { min-height: 0; overflow-y: auto; align-self: stretch; padding: 8px; gap: 6px; display: flex; flex-direction: column; }
+  .decided { font-size: 12.5px; padding: 4px 8px; }
+  .choices-actions { gap: 5px; }
+  .big-act { grid-template-columns: 28px 1fr; gap: 8px; padding: 6px 10px; border-radius: 8px; }
+  .big-act svg { width: 26px; height: 26px; }
+  .big-act strong { font-size: 14px; }
+  .big-act small { font-size: 11.5px; line-height: 1.3; margin-top: 1px; }
+  .sub-panel { padding: 6px 8px; gap: 5px; }
+  .work img { height: 54px; }
+  .validate { position: sticky; bottom: 0; margin-top: auto; padding: 9px; font-size: 15px; }
+  #status { margin: 0; font-size: 12px; }
+}
+
+/* Vignettes des photos : vraies proportions (même hauteur, largeur selon l'image) */
+.choice { width: auto; flex: none; }
+.choice img { height: 64px; width: auto; max-width: 200px; object-fit: contain; }
+.choice > span { width: 0; min-width: 100%; }
+.choice .fname { max-height: 2.6em; }

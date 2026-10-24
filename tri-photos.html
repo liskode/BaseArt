@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Tri des photos — BaseArt</title>
-  <link rel="stylesheet" href="tri-photos.css?v=8">
+  <link rel="stylesheet" href="tri-photos.css?v=10">
 </head>
 <body>
   <section id="login" class="login">
@@ -49,13 +49,13 @@
           <div class="f-wide" data-mode="situ">Catégorie
             <div class="types" id="f-situ-types"></div>
           </div>
-          <label class="f-wide">Titre <input type="text" id="f-title"></label>
+          <label class="f-title">Titre <input type="text" id="f-title"></label>
           <label data-mode="work">Année <input type="number" id="f-year" min="1900" max="2100" step="1"></label>
           <label data-mode="work">Format <select id="f-format"></select></label>
           <label data-mode="work">Technique <select id="f-technique"></select></label>
-          <label data-mode="work">Largeur (cm) <input type="number" id="f-width" min="0" step="0.5"></label>
-          <label data-mode="work">Hauteur (cm) <input type="number" id="f-height" min="0" step="0.5"></label>
-          <div class="f-wide" data-mode="work">Séries
+          <label data-mode="work" class="f-dims">Largeur (cm) <input type="number" id="f-width" min="0" step="0.5"></label>
+          <label data-mode="work" class="f-dims">Hauteur (cm) <input type="number" id="f-height" min="0" step="0.5"></label>
+          <div class="f-wide f-series-row" data-mode="work">Séries
             <div class="f-series" id="f-series"></div>
             <select id="f-series-add" aria-label="Ajouter une série"></select>
           </div>
@@ -119,7 +119,7 @@
 
   <script src="baseart-config.js"></script>
   <script src="editor-common.js?v=20250702-4"></script>
-  <script src="tri-photos.js?v=18"></script>
+  <script src="tri-photos.js?v=19"></script>
   <script src="site-update.js?v=2" defer></script>
 </body>
 </html>
