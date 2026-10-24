@@ -247,7 +247,7 @@
         title: i.label, onclick: () => { sel = i.key; renderAll(); },
       },
       el('img', { src: i.thumb, alt: '', loading: 'lazy' }),
-      el('span', {}, i.catalogue ? 'Catalogue ' + dupWork : i.key === g.photos[0].name ? 'meilleure' : '', dot(i.q)),
+      el('span', {}, i.catalogue ? 'Catalogue ' + dupWork : i.key === g.photos[0].name ? 'meilleure' : i.key.replace(/\.[a-z0-9]+$/i, ''), dot(i.q)),
       el('span', { class: 'fname', text: i.catalogue ? (workById.get(dupWork)?.title || '') : i.key }))
     ));
   }

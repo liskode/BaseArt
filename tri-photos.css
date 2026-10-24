@@ -157,3 +157,35 @@ kbd { border: 1px solid currentColor; border-radius: 3px; padding: 0 4px; font-s
 .choice img { height: 64px; width: auto; max-width: 200px; object-fit: contain; }
 .choice > span { width: 0; min-width: 100%; }
 .choice .fname { max-height: 2.6em; }
+
+/* ---- Encore plus compact (petites fenêtres, barres Safari visibles) ---- */
+@media (min-width: 900px) {
+  .top { padding: 4px 10px; }
+  h1 { font-size: 15px; }
+  .stage { grid-template-columns: minmax(0, 1fr) 320px; gap: 8px; padding: 6px 8px 8px; }
+  .viewer { padding: 6px; }
+  /* Vignettes : une seule ligne sous l'image, nom complet au survol */
+  .choice img { height: 52px; }
+  .choice > span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 10.5px; margin-top: 1px; }
+  .choice .fname { display: none; }
+  /* Fiche : intitulés plus discrets */
+  .fiche { margin-top: 4px; padding: 4px 6px; gap: 2px 6px; }
+  .fiche-head { font-size: 12px; }
+  .fiche-head small { display: none; }
+  .fiche label, .fiche .f-wide { font-size: 10.5px; gap: 1px; }
+  .fiche input, .fiche select { font-size: 12.5px; padding: 2px 5px; }
+  .types button { font-size: 12px; padding: 1px 8px; }
+  /* Actions : seule l'action choisie affiche son explication */
+  .big-act { grid-template-columns: 22px 1fr; gap: 8px; padding: 5px 9px; }
+  .big-act svg { width: 22px; height: 22px; }
+  .big-act strong { font-size: 13.5px; }
+  .big-act small { display: none; }
+  .big-act[aria-checked="true"] small { display: block; }
+  .meta { gap: 3px; }
+  .chip { font-size: 11px; }
+  .validate { padding: 8px; font-size: 14.5px; }
+}
+/* Fenêtres hautes : la place permet d'afficher l'explication de chaque action */
+@media (min-width: 900px) and (min-height: 900px) {
+  .big-act small { display: block; }
+}
