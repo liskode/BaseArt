@@ -244,7 +244,8 @@
     $('choices').replaceChildren(...items.map((i) =>
       el('button', {
         type: 'button', class: 'choice' + (i.key === sel ? ' selected' : '') + (i.catalogue ? ' catalogue' : ''),
-        title: i.label, onclick: () => { sel = i.key; renderAll(); },
+        'data-preview': i.big, 'data-caption': i.label + (i.size ? ' — ' + i.size : '') + (i.q != null ? ' — qualité ' + i.q + '/100' : ''),
+        onclick: () => { sel = i.key; renderAll(); },
       },
       el('img', { src: i.thumb, alt: '', loading: 'lazy' }),
       el('span', {}, i.catalogue ? 'Catalogue ' + dupWork : i.key === g.photos[0].name ? 'meilleure' : i.key.replace(/\.[a-z0-9]+$/i, ''), dot(i.q)),
@@ -507,16 +508,27 @@
     preview.style.left = x + 'px';
     preview.style.top = y + 'px';
   }
+  const HOVER_TARGETS = '.work[data-work], .choice[data-preview]';
   document.addEventListener('mouseover', (e) => {
-    const t = e.target instanceof Element ? e.target.closest('.work[data-work]') : null;
+    const t = e.target instanceof Element ? e.target.closest(HOVER_TARGETS) : null;
     if (!t) return;
-    const id = t.dataset.work;
-    const w = workById.get(id) || {};
-    const img = preview.querySelector('img');
-    const src = catalogueImg(id, true);
+    let src;
+    let caption;
+    if (t.dataset.work) {
+      // Œuvre du catalogue (tableaux à rattacher, doublon)
+      const id = t.dataset.work;
+      const w = workById.get(id) || {};
+      src = catalogueImg(id, true);
+      caption = id + (w.title ? ' — ' + w.title : '') + (w.year ? ' (' + w.year + ')' : '');
+    } else {
+      // Photo du groupe (vignettes sous la grande photo)
+      src = t.dataset.preview;
+      caption = t.dataset.caption || '';
+    }
     if (!src) return;
+    const img = preview.querySelector('img');
     if (img.getAttribute('src') !== src) img.src = src;
-    preview.querySelector('p').textContent = id + (w.title ? ' — ' + w.title : '') + (w.year ? ' (' + w.year + ')' : '');
+    preview.querySelector('p').textContent = caption;
     preview.hidden = false;
     placePreview(e);
   });
@@ -524,7 +536,7 @@
     if (!preview.hidden) placePreview(e);
   });
   document.addEventListener('mouseout', (e) => {
-    const t = e.target instanceof Element ? e.target.closest('.work[data-work]') : null;
+    const t = e.target instanceof Element ? e.target.closest(HOVER_TARGETS) : null;
     if (t && !(e.relatedTarget instanceof Element && t.contains(e.relatedTarget))) preview.hidden = true;
   });
 
